@@ -11,3 +11,117 @@
 	* Updated Examples/Quote_example.pl to include TIAA-CREF examples.
 
 	* CVSTAG: finance_quote_0_17
+
+2000-04-10	Paul Fenwick	<pjf@cpan.org>
+	* Changed Examples/chkshares.pl to print a pretty table.
+
+	* Incorporated Cooper Vertz's patch to add high, low and net change
+	  to quotes obtained from Yahoo!
+
+2000-04-13	Paul Fenwick	<pjf@cpan.org>
+	* Fidelity private functions renamed to indicate they are private.
+
+	* Small optimisations in fidelity functions to avoid spurious warnings
+	  and un-needed processing of non-useful lines.
+
+	* Functions now quickly return undef when not passed a list of stocks.
+	  Previously they would waste time looking up nothing.
+
+	* Documentation additions and corrections.
+
+	* Added test files (Use.t, asx.t, yahoo.t, fidelity.t)
+
+	* Added experimental function (currency) to look-up conversion
+	  rates between currencies.
+
+	* Added an example script (currency-lookup.pl) to test said
+	  currency conversion.
+
+2000-04-14	Paul Fenwick	<pjf@cpan.org>
+	* Added TIAA-CREF testing script.
+
+	* Added troweprice testing script.
+
+2000-04-16	Paul Fenwick	<pjf@cpan.org>
+	* Added yahoo_europe test script.
+
+	* Removed depreciated vanguard function.
+
+2000-04-18	Paul Fenwick	<pjf@cpan.org>
+	* Added fetch() function to provide a cleaner interface to fetching
+	  quotes from a variety of sources.
+
+	* Added tests for fetch() to the asx.t test script.
+
+2000-04-20	Paul Fenwick	<pjf@cpan.org>
+	* Removed misleading comments from Finance::Quote.pm
+
+2000-04-21	Paul Fenwick	<pjf@cpan.org>
+	* Added extra methods to fetch (nasdaq, nyse) which act as
+	  aliases to yahoo.
+
+	* Added stockdump.pl example script, which is handy in debugging.
+
+	* fetch is now an exportable function.
+
+	* yahoo() function no longer returns entries for fields that
+	  used to be returned as 'N/A'.
+
+	* yahoo() now supports the $stocks{$sym,'success'} notation.
+
+2000-04-21      Brent Neal      <brentn@users.sourceforge.net>
+        * Added checking for bogus symbols in tiaacref
+        * Added checking of the LWP::UserAgent->is_success method
+	* tiaacref() now supports $stocks{$sym,'success'} notation.
+        * Updated t/tiaacref.t and Examples/Quote_example.pl for
+               the changes
+
+2000-04-23	Paul Fenwick	<pjf@cpan.org>
+	* Added success/fail tests to asx, fidelity, troweprice, yahoo
+	  and yahoo_europe.
+
+	* Updated appropriate testing functions.
+
+	* Updated documentation to include fetch and list of known
+	  bugs.
+
+	* Updated yahoo_europe to return undef's instead of N/As.
+
+	* Removed HTML from returns from yahoo_europe.
+
+	* Fixed logic bug in process yahoo_* N/As into undefs.
+
+2000-04-24	Paul Fenwick	<pjf@cpan.org>
+	* Updated in-line code regarding checking for Yahoo!
+	  successes.
+
+	* Added meaningful error-messages to Yahoo! when stock
+	  lookups fail.
+	  
+2000-04-24	Brent Neal		<brentn@users.sourceforge.net>
+	* Finished updating error-checking for tiaacref. The tiaacref
+	  function now returns a success/failure flag for every symbol
+	  passed to it. It also checks that the data is valid. Returns
+	  meaningful error messages for these failures.
+
+2000-04-25	Paul Fenwick	<pjf@cpan.org>
+	* Rolled changes together when CVS got a little out-of-whack.  :)
+
+	* Return many new fields from yahoo() which we previously fetched
+	  but did not use.  These include avg_vol, day_range, year_range,
+	  div_date, div, and div_yield.
+
+	* Fixed typo in docs  s/yeild/yield/;
+	
+	* Added ex_div for Ex-Divident Date in yahoo().
+
+2000-04-30	Paul Fenwick	<pjf@cpan.org>
+	* Updated POD.
+
+	* Improved returned error messages.
+
+	* Updated the README file.
+
+	* Updated the INSTALL file.
+
+	* Tagged files as finance_quote_0_18 for release.
