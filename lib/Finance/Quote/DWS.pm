@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.2 2000/08/21 20:05:03 volkers Exp $
+# $Id: DWS.pm,v 1.4 2002/02/04 20:37:34 volkers Exp $
 
 package Finance::Quote::DWS;
 require 5.005;

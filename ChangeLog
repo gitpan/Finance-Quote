@@ -522,3 +522,31 @@
 
 	* Updated lists of copyright holders, SEE ALSO sections
 	  in man-pages.
+
+	* CVSTAG: finance_quote_1_06
+
+2001-07-04	Paul Fenwick	<pjf@cpan.org>
+	* Confirmed debian packages release with Ross Peachey.
+
+	* Moved cvs tags in debian/* so that finance_quote_1_06
+	  point to the files used in building 1.06, not those building
+	  1.05.
+
+2001-07-23	Paul Fenwick	<pjf@cpan.org>
+	* Updated Yahoo::Europe.pm so that stocks fetched from the
+	  Stockholm exhcnage (.ST) are correctly listed as being in
+	  Swedish Krona (SEK).
+
+2001-12-19	Paul Fenwick	<pjf@cpan.org>
+	* Added Finance::Quote::Yahoo::Asia to provide lookup of
+	  Asian stock quotes (not including Japan).  Many thanks
+	  to M.R.Muthu Kumar for this patch.
+
+2002-04-18	Paul Fenwick	<pjf@cpan.org>
+	* Patched Quote.pm after currency conversion started to fail.
+	  Many thanks to Sean Wenzel for the fix.
+
+	* Updated documentation in ASX.pm and Trustnet.pm to note their
+	  current functional unhappiness.
+
+	* CVSTAG: finance_quote_1_07

@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -165,7 +165,8 @@ sub new {
 		# Default modules
 		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
 		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet Fool AEX Tdwaterhouse/;
+			       DWS VWD Trustnet Fool AEX Tdwaterhouse
+			       Yahoo::Asia/;
 	}
 
 	$this->_load_modules(@modules,@reqmodules);
@@ -233,7 +234,7 @@ sub currency {
 	my $ua = $this->user_agent;
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td(?: nowrap)?>[^<]+</td><td>(\d+\.\d+)</td>#;
+	my ($exchange_rate) = $data =~ m#$from$to=X</a></th><th>1</th><th(?: nowrap)?>[^<]+</th><td>(\d+\.\d+)</td>#;
 
 	return undef unless $exchange_rate;
 	return ($exchange_rate * $amount);
