@@ -1,13 +1,15 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 10};
+BEGIN {plan tests => 11};
 
 use Finance::Quote;
 
 # Test ASX functions.
 
 my $q      = Finance::Quote->new();
+
+$q->timeout(120);	# ASX is broken regularly, so timeouts are good.
 
 my %quotes = $q->asx("CML","BHP");
 ok(defined(%quotes));
@@ -27,6 +29,10 @@ ok($quotes{"ITE","success"} > 0);
 
 # Check that we're getting currency information.
 ok($quotes{"ITE", "currency"} eq "AUD");
+
+# Check we're not getting bogus percentage signs.
+$quotes{"ITE","p_change"} ||= "";	# Avoid warning if undefined.
+ok($quotes{"ITE","p_change"} !~ /%/);
 
 # Check that looking up a bogus stock returns failure:
 %quotes = $q->asx("BOGUS");

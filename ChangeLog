@@ -281,3 +281,85 @@
 	  may be useful for future module writers.
 
 	* CVSTAG: finance_quote_1_01
+
+2000-07-31	Paul Fenwick	<pjf@cpan.org>
+	* The currency function no longer makes an expensive HTTP
+	  request if both the to and from currencies are identical.
+
+2000-08-04	Paul Fenwick	<pjf@cpan.org>
+	* Patched Yahoo::Base to no longer return spurious percentage signs.
+
+2000-08-06	Paul Fenwick	<pjf@cpan.org>
+	* Updated regression testing scripts to make sure that spurious
+	  percentage signs are no longer returned.
+
+2000-08-14	Paul Fenwick	<pjf@cpan.org>
+	* Updated chkshares script so that it can deal with any market,
+	  not just the ASX.
+
+2000-08-16	Paul Fenwick	<pjf@cpan.org>
+	* Added DWS.pm module to the CVS repository, courtesy of
+	  Volker Stuerzl.  This module fetches information from the
+	  Deutsche Bank Gruppe.
+
+	* Updated asx.t script because it really hurts the entire
+	  "make test" thing when ASX is unhappy.  Now it still hurts
+	  (because the ASX module sucks), but less.
+
+2000-08-21	Paul Fenwick	<pjf@cpan.org>
+	* Improved documentation in the yahoo_europe test script.
+
+2000-08-22	Volker Stuerzl	<volkers@users.sourceforge.net>
+	* Added DWS test script.
+
+2000-08-29	Paul Fenwick	<pjf@cpan.org>
+	* Rejiggered ASX module to try and make it work again after
+	  an ASX site rewrite.
+
+	* Updated Quote.pm so that if a method was called directly
+	  (old-style) not through fetch, then it would do the right
+	  thing if called via an object.  This means that things
+	  like $q->asx(@stocks) work correctly again.
+
+	* Updated fetch() method so that it returns the empty list
+	  rather than undef when called in an array context.
+
+	* fetch() now returns a hashref if called in a scalar context.
+
+2000-08-31	Paul Fenwick	<pjf@cpan.org>
+	* Added Keith Refson's Trustnet module.
+
+	* Added .cvsignore file to reduce spam for developers using CVS.
+
+	* Updated Yahoo/USA.pm to provide more compatible returns when
+	  called as a fidelity failover.
+
+	* Tweaked DWS.t testing script so that it loads the module
+	  correctly.
+
+2000-09-01	Paul Fenwick	<pjf@cpan.org>
+	* Tweaked ASX.pm to avoid divide-by-zero errors and dodgy
+	  bogus-looking label values.
+
+2000-09-04	Paul Fenwick	<pjf@cpan.org>
+	* Keith Refson's patch to Trustnet to avoid premature returns
+	  in case of a bad symbol.
+
+2000-09-12	Paul Fenwick	<pjf@cpan.org>
+	* Mention of Bill Bell's java library in the FAQ.
+
+2000-09-16	Paul Fenwick	<pjf@cpan.org>
+	* Added Volker's VWD module and testing script.
+
+	* Updated Makefile to check for HTML::TableExtract.
+
+	* Updated INSTALL file to provide infomation on how to install
+	  modules that F::Q depends upon.
+
+	* Updated Quote.pm to load VWD, DWS and Trustnet by default.
+
+	* Updated README file to mention the webpage.
+
+	* Added Trustnet regression testing program.
+
+	* CVSTAG: finance_quote_1_02
