@@ -42,7 +42,8 @@ use vars qw/$ASX_URL $VERSION/;
 
 $VERSION = "1.04";
 
-$ASX_URL = 'http://www.asx.com.au/scripts/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
+#$ASX_URL = 'http://www.asx.com.au/asx/markets/PriceResults.jsp?method=get&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/asx/markets/PriceResults.jsp?method=get&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -100,6 +101,8 @@ sub asx {
 		# Delete spaces and '*' which sometimes appears after the code.
 		# Also delete high bit characters.
 		$stock =~ tr/* \200-\377//d;
+
+		$info{$stock,'symbol'} = $stock;
 
 		foreach my $label (qw/name last p_change bid offer open
 			      high low volume/) {
@@ -171,11 +174,6 @@ sub asx {
 =head1 NAME
 
 Finance::Quote::ASX	- Obtain quotes from the Australian Stock Exchange.
-
-=head1 NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-
-This module is currently non-functional.  For Australian stock prices,
-please use the "australian" quote source instead.
 
 =head1 SYNOPSIS
 

@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -166,7 +166,8 @@ sub new {
 		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
 		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
 			       DWS VWD Trustnet Fool AEX Tdwaterhouse
-			       Yahoo::Asia/;
+			       Yahoo::Asia FTPortfolios IndiaMutual
+			       BMONesbittBurns/;
 	}
 
 	$this->_load_modules(@modules,@reqmodules);
@@ -234,9 +235,15 @@ sub currency {
 	my $ua = $this->user_agent;
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></th><th>1</th><th(?: nowrap)?>[^<]+</th><td>(\d+\.\d+)</td>#;
+	my ($exchange_rate) = $data =~ m#$from$to=X</a></th><th>1</th><th(?: nowrap)?>[^<]+</th><t[dh]>(\d+\.\d+)</t[dh]>#;
 
-	return undef unless $exchange_rate;
+	{
+		local $^W = 0;	# Avoid undef warnings.
+
+		# We force this to a number to avoid situations where
+		# we may have extra cruft, or no amount.
+		return undef unless ($exchange_rate+0);
+	}
 	return ($exchange_rate * $amount);
 }
 
@@ -834,6 +841,7 @@ http://www.gnucash.org/
 
 Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
 Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::Fool,
+Finance::Quote::FTPortfolios,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,

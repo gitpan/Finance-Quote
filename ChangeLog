@@ -550,3 +550,67 @@
 	  current functional unhappiness.
 
 	* CVSTAG: finance_quote_1_07
+
+2002-06-25	Paul Fenwick	<pjf@cpan.org>
+	* Added ZI.pm and Union.pm modules.  Thanks to Rainer Dorsch
+	  for providing these.
+
+2003-02-04	Paul Fenwick	<pjf@cpan.org>
+	* Fixed VWD problem whereby no symbol was being returned.
+	  Many thanks to Joachim Breitner for this fix.  (#600698)
+
+	* Updated TrustNet documentation, thanks to David Hampton.
+	  (#666349)
+
+2003-07-04	Paul Fenwick	<pjf@cpan.org>
+	* Fixed currency conversion problems. (#232075)
+
+	* Fixed ASX problems whereby quotes were not being obtained.
+	  Thanks to Rik Harris for bringing this issue to light,
+	  and providing a correct URL.  (#653025)
+
+	* Fixed problem where no symbol tag was being defined in ASX.
+	  Thanks again to Rik Harris.  (#653035)
+
+	* Fixed problem where undefined currencies would be returned
+	  as zero, and not undefined as occured in previous versions.
+
+	* Fixed tests in currency.t which assumed that conversion
+	  could be done between EUR and former European currencies.
+	  These are no longer supported due to a change in the
+	  lookups provided by Yahoo.
+
+	* Updated Fidelity.pm to indicate its current non-working status.
+
+	* Added T. Rowe Price patches by David Hampton, which provide
+	  a troweprice_direct method.  (#666351)
+
+	* As above, for the Fidelity module.  (#666353)
+
+	* Accepted David Hampton's patch to Yahoo currencies.
+	  The correct currency will now be flagged on stocks regardless
+	  of the module used to grab them. (#666361)
+
+	* Added Keith Refson's module to obtain quotes from
+	  First Trust Portfolios L.P.  Thanks to David Hampton
+	  (again!) for supplying this. (#670202)
+
+	* Added Ganesan Rajagopal's excellent IndiaMutal module.
+	  (#720896)
+
+	* Fixed Cdnfundlibrary to correctly set the success flag
+	  when successful.  Thanks to Robert Clark for finding
+	  this bug.  (#752395)
+
+	* Updated Tdwaterhouse.pm with Robert Clark's changes to
+	  work with the new TD Waterhouse website.  Many thanks
+	  to Robert Clark again. (#750843)
+
+	* Added the BM Nesbitt Burns module provided by Robert
+	  Clark, including test cases.  (#752423).
+
+	* Updated BMONesbittBurns module to provide better date
+	  handling, screening out of high-ascii characters from
+	  fields, and removal of spurious debug output.
+
+	* CVSTAG: finance_quote_1_08

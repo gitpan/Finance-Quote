@@ -12,6 +12,7 @@ Examples/currency-lookup.pl
 Examples/stockdump.pl
 lib/Finance/Quote/Fidelity.pm
 lib/Finance/Quote/ASX.pm
+lib/Finance/Quote/BMONesbittBurns.pm
 lib/Finance/Quote/DWS.pm
 lib/Finance/Quote/Yahoo/Asia.pm
 lib/Finance/Quote/Yahoo/Australia.pm
@@ -27,10 +28,13 @@ lib/Finance/Quote/Fool.pm
 lib/Finance/Quote/AEX.pm
 lib/Finance/Quote/Cdnfundlibrary.pm
 lib/Finance/Quote/Tdwaterhouse.pm
+lib/Finance/Quote/FTPortfolios.pm
+lib/Finance/Quote/IndiaMutual.pm
 lib/Finance/Quote.pm
 test/currency.t
 test/Use.t
 test/asx.t
+test/bmonesbittburns.t
 test/fidelity.t
 test/dws.t
 test/aex.t
@@ -41,3 +45,4 @@ test/vanguard.t
 test/vwd.t
 test/yahoo.t
 test/yahoo_europe.t
+test/indiamutual.t

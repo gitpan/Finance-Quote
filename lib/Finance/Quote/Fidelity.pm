@@ -50,8 +50,13 @@ $FIDELITY_ASSET_URL = ("http://activequote100.fidelity.com/nav/asset.csv");
 sub methods {return (fidelity        => \&fidelity,
                      fidelity_direct => \&fidelity);}
 
-sub labels { return (fidelity=>[qw/exchange name number nav change ask
-                                   date yield price method/]); }
+{
+	my @labels = qw/exchange name number nav change ask
+                        date yield price method/;
+
+	sub labels { return (fidelity        => \@labels,
+	                     fidelity_direct => \@labels); }
+}
 
 # =======================================================================
 # the fidelity routine gets quotes from fidelity investments
@@ -261,6 +266,10 @@ sub _fidelity_mm
 =head1 NAME
 
 Finance::Quote::Fidelity - Obtain information from Fidelity Investments.
+
+=head1 NOTE NOTE NOTE NOTE NOTE
+
+This module is currently non-functional.
 
 =head1 SYNOPSIS
 
