@@ -39,13 +39,13 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 # URLs of where to obtain information.
 
-$TRUSTNET_URL = ("http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0&txtS=");
+$TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&unit=all&type=all&sort=5&ss=0&booAutif=0&txtS=');
 
-$TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0";
+$TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp";
 
 sub methods { return (uk_unit_trusts => \&trustnet, trustnet => \&trustnet); }
 
@@ -66,7 +66,7 @@ sub trustnet
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$date,$price,$currency,$reply,$trust);
     my ($row, $datarow, $matches);
-    my %curr_iso = ("£" => "GBP", "\$" => "USD");
+    my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
     my( $isodate, $day, $month, $year);
     my %imonth = ( "Jan" => "01", "Feb" => "02", "Mar" => "03",
                    "Apr" => "04", "May" => "05", "Jun" => "06",
@@ -117,7 +117,7 @@ sub trustnet
 	  # ($aa {$trust, "name"} = $$datarow[0]) =~ s/^ +//;
 	  $aa {$trust, "name"} = $trust; # no name supplied ... 
 	  ($price = $$datarow[2]) =~ s/\s*\((.*)\)//;
-	  $currency=$1;
+	  $currency=$1||"GBP";
 	  $aa {$trust, "currency"} = $curr_iso{"$currency"};
 	  $aa {$trust, "bid"} = $price * 0.01;
 	  ($price = $$datarow[3]) =~ s/\s*\((.*)\)//;

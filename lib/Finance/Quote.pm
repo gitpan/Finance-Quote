@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -148,24 +148,27 @@ sub new {
 	bless $this, $class;
 
 	my @modules = ();
+	my @reqmodules = ();	# Requested modules.
 
 	# If there's no argument list, but we have the appropriate
 	# environment variable set, we'll use that instead.
 	if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
-		@_ = split(' ',$ENV{FQ_LOAD_QUOTELET});
+		@reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+	} else {
+		@reqmodules = @_;
 	}
 
 	# If we get an empty new(), or one starting with -defaults,
 	# then load up the default methods.
-	if (!@_ or $_[0] eq "-defaults") {
-		shift if (@_);
+	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
+		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
-                               Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet/;
+		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
+		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
+			       DWS VWD Trustnet Fool AEX Tdwaterhouse/;
 	}
 
-	$this->_load_modules(@modules,@_);
+	$this->_load_modules(@modules,@reqmodules);
 
 	$this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
 	$this->{FAILOVER} = 1;
@@ -185,6 +188,20 @@ sub new {
 		return $dummy_obj ||= Finance::Quote->new;
 	}
 }
+
+# =======================================================================
+# sources (public object method)
+#
+# sources returns a list of sources which can be passed to fetch to
+# obtain information.
+#
+# Usage: @sources   = $quoter->sources();
+#        $sourceref = $quoter->sources();
+
+sub sources {
+	return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
+
 
 # =======================================================================
 # currency (public object method)
@@ -666,6 +683,15 @@ If you wish to fetch information from only one particular source,
 then consult the documentation of that sub-module for further
 information.
 
+=head2 SOURCES
+
+    my @sources = $q->sources;
+    my $listref = $q->sources;
+
+The sources method returns a list of sources that have currently been loaded and
+can be passed to the fetch method.  If you're providing a user with a list of
+sources to choose from, then it is recommended that you use this method.
+
 =head2 CURRENCY
 
     $conversion_rate = $q->currency("USD","AUD");
@@ -760,8 +786,14 @@ conversion rates.
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
- Copyright 2000, Paul Fenwick (updates for ASX, maintainence and release)
- Copyright 2000, Brent Neal (update for TIAA-CREF)
+ Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+ Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
+ Copyright 2000 Volker Stuerzl (DWS and VWD support)
+ Copyright 2000 Keith Refson (Trustnet support)
+ Copyright 2001 Rob Sessink (AEX support)
+ Copyright 2001 Leigh Wedding (ASX updates)
+ Copyright 2001 Tobias Vancura (Fool support)
+ Copyright 2001 James Treacy (TD Waterhouse support)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -783,6 +815,10 @@ module.  Please refer to the sub-modules for further information.
   Brent Neal (C<brentn@users.sourceforge.net>)
   Volker Stuerzl (C<volker.stuerzl@gmx.de>)
   Keith Refson (C<Keith.Refson#earth.ox.ac.uk>)
+  Rob Sessink (C<rob_ses@users.sourceforge.net>)
+  Leigh Wedding (C<leigh.wedding@telstra.com>)
+  Tobias Vancura (C<tvancura@altavista.net>)
+  James Treacy (C<treacy@debian.org>)
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
@@ -795,9 +831,13 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
-Finance::Quote::Yahoo, Finance::Quote::ASX, Finance::Quote::Fidelity,
-Finance::Quote::Tiaacref, Finance::Quote::Troweprice, LWP::UserAgent,
-Finance::Quote::DWS, Finance::Quote::VWD, Finance::Quote::Trustnet
+Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
+Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::Fool,
+Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
+Finance::Quote::Troweprice, Finance::Quote::Trustnet,
+Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
+Finance::Quote::Yahoo::Europe, Finance::Quote::Yahoo::USA,
+LWP::UserAgent
 
 You should have also received the Finance::Quote hacker's guide with
 this package.  Please read it if you are interested in adding extra

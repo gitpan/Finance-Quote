@@ -5,6 +5,7 @@
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
+#    Copyright (C) 2001, Leigh Wedding <leigh.wedding@telstra.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,12 +36,13 @@ package Finance::Quote::ASX;
 
 use HTTP::Request::Common;
 use LWP::UserAgent;
+use HTML::TableExtract;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = "1.02";
+$VERSION = "1.04";
 
-$ASX_URL = 'http://www.asx.com.au/nd50/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/scripts/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -56,6 +58,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # The ASX provides free delayed quotes through their webpage.
 #
 # Maintainer of this section is Paul Fenwick <pjf@cpan.org>
+# 5-May-2001 Updated by Leigh Wedding <leigh.wedding@telstra.com>
 
 sub asx {
 	my $quoter = shift;
@@ -73,57 +76,40 @@ sub asx {
 		}
 		return wantarray() ? %info : \%info;
 	}
-	my $reply = $response->content;
 
-	# These first two steps aren't really needed, but are done for
-	# safety.
+	my $te = HTML::TableExtract->new(
+		headers => ["Code","Company Name", "Last", "$ +/-", "Bid", "Offer",
+		            "Open", "High", "Low", "Vol"]);
 
-	# Remove the bottom part of the page.
-	$reply =~ s#</table>\s*\n<table>.*$##s;
-	# Remove top of page.
-	$reply =~ s#.*Chart</font></a></td></tr><tr><td nowrap valign=top>##s;
+	$te->parse($response->content);
 
-	# Grab the values
-	my @values;
-
-	while ($reply =~ m#<font size='2' face='Arial' color='\#000051'>([^<]*).*?</Font>#g) {
-		push @values, $1;
-	}
-
-	if (@values % 13) { # Wrong number of fields?  Damn!
-		warn "Bad number of fields returned from ASX website in ".
-		     "Finance::Quote::ASX.  Aborting query.\n";
-
+	# Extract table contents.
+	my @rows;
+	unless (@rows = $te->rows) {
 		foreach my $stock (@stocks) {
-			$info{$stock,"success"}  = 0;
-			$info{$stock,"errormsg"} = "ASX website corrupted.";
+			$info{$stock,"success"} = 0;
+			$info{$stock,"errormsg"} = "Failed to parse HTML table.";
 		}
-		return %info if wantarray;
-		return \%info;
+		return wantarray() ? %info : \%info;
 	}
 
-	# Go through all the values and pack them into our structure.
-	# We rely upon the particular ordering of fields at the ASX,
-	# so this is a little dangerous.
+	# Pack the resulting data into our structure.
+	foreach my $row (@rows) {
+		my $stock = shift(@$row);
 
-	while (@values) {
-		my $stock = shift @values;
-		$stock =~ s/&nbsp;//;	# Remove guff.
+		# Delete spaces and '*' which sometimes appears after the code.
+		# Also delete high bit characters.
+		$stock =~ tr/* \200-\377//d;
 
 		foreach my $label (qw/name last p_change bid offer open
-			      high low volume JUNK JUNK JUNK/) {
+			      high low volume/) {
+			$info{$stock,$label} = shift(@$row);
 
-			my $value = shift @values;
-			next if ($label eq "JUNK");
-
-			# Clean the value.
-
-			$value =~ tr/$,%//d;
-			$value =~ s/&nbsp;//;
-
-			$info{$stock,$label} = $value;
+			# Again, get rid of nasty high-bit characters.
+			$info{$stock,$label} =~ tr/ \200-\377//d 
+				unless ($label eq "name");
 		}
-
+		
 		# If that stock does not exist, it will have a empty
 		# string for all the fields.  The "last" price should
 		# always be defined (even if zero), if we see an empty
@@ -134,6 +120,9 @@ sub asx {
 			$info{$stock,'errormsg'}="Stock does not exist on ASX.";
 			next;
 		}
+
+		# Drop commas from volume.
+		$info{$stock,"volume"} =~ tr/,//d;
 
 		# The ASX returns zeros for a number of things if there
 		# has been no trading.  This not only looks silly, but
