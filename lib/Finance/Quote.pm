@@ -40,14 +40,14 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
 	    $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/m5?";
+$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -117,6 +117,12 @@ sub _load_modules {
 			
 			my @currency_fields = &$curr_fields_func;
 
+			# @currency_fields may contain duplicates.
+			# This following chunk of code removes them.
+
+			my %seen;
+			@currency_fields=grep {!$seen{$_}++} @currency_fields;
+
 			foreach my $method (keys %methodhash) {
 				push (@{$METHODS{$method}},
 					{ function => $methodhash{$method},
@@ -143,10 +149,16 @@ sub new {
 
 	my @modules = ();
 
+	# If there's no argument list, but we have the appropriate
+	# environment variable set, we'll use that instead.
+	if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
+		@_ = split(' ',$ENV{FQ_LOAD_QUOTELET});
+	}
+
 	# If we get an empty new(), or one starting with -defaults,
 	# then load up the default methods.
-	if (!scalar(@_) or $_[0] eq "-defaults") {
-		shift if (scalar(@_));
+	if (!@_ or $_[0] eq "-defaults") {
+		shift if (@_);
 		# Default modules
 		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
                                Tiaacref Yahoo::USA Yahoo::Europe
@@ -204,7 +216,7 @@ sub currency {
 	my $ua = $this->user_agent;
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td>[^<]+</td><td>(\d+\.\d+)</td>#;
+	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td(?: nowrap)?>[^<]+</td><td>(\d+\.\d+)</td>#;
 
 	return undef unless $exchange_rate;
 	return ($exchange_rate * $amount);
@@ -596,11 +608,22 @@ the empty list may be returned, or undef in a scalar context.
     my $q = Finance::Quote->new("ASX");
     my $q = Finance::Quote->new("-defaults", "CustomModule");
 
-In the first form, this creates a new Finance::Quote object
-with the default methods.  In the second form, an object
-is created with only the specified modules loaded.  In
-the third form, both the default methods and the speicified
-modules afterwards are loaded.
+With no arguents, this creates a new Finance::Quote object
+with the default methods.  If the environment variable
+FQ_LOAD_QUOTELETS is set, then the contents of FQ_LOAD_QUOTELETS
+(split on whitespace) will be used as the argument list.  This allows
+users to load their own custom modules without having to change
+existing code.  If you do not want users to be able to load their own
+modules at run-time, pass an explicit argumetn to ->new() (usually
+"-defaults").
+
+When new() is passed one or more arguments, an object is created with
+only the specified modules loaded.  If the first argument is
+"-defaults", then the default modules will be loaded first, followed
+by any other specified modules.
+
+Note that the FQ_LOAD_QUOTELETS environment variable must begin
+with "-defaults" if you wish the default modules to be loaded.
 
 Any modules specified will automatically be looked for in the
 Finance::Quote:: module-space.  Hence,
