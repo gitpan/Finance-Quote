@@ -12,7 +12,7 @@ my $q      = Finance::Quote->new();
 $q->timeout(120);	# ASX is broken regularly, so timeouts are good.
 
 my %quotes = $q->asx("CML","BHP");
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check the last values are defined.  These are the most used and most
 # reliable indicators of success.
@@ -23,7 +23,7 @@ ok($quotes{"BHP","success"});
 
 # Exercise the fetch function a little.
 %quotes = $q->fetch("asx","ITE");
-ok(defined(%quotes));
+ok(%quotes);
 ok($quotes{"ITE","last"} > 0);
 ok($quotes{"ITE","success"} > 0);
 
@@ -35,6 +35,6 @@ $quotes{"ITE","p_change"} ||= "";	# Avoid warning if undefined.
 ok($quotes{"ITE","p_change"} !~ /%/);
 
 # Check that looking up a bogus stock returns failure:
-%quotes = $q->asx("BOGUS");
-ok(! $quotes{"BOGUS","success"});
+%quotes = $q->asx("BOG");
+ok(! $quotes{"BOG","success"});
 
