@@ -44,7 +44,7 @@ use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because
@@ -83,11 +83,10 @@ sub yahoo_request {
 	my $quoter = shift;
 	my $base_url = shift;
 
-	# We tack an extra empty symbol on the end such that when we
-	# join all the symbols up later, the suffixes will all be
-	# added happily.
-	my @orig_symbols = (@{shift()}, "");
+	# Extract our original symbols.
+	my @orig_symbols = @{shift()};
 
+	# The suffix is used to specify particular markets.
 	my $suffix = shift || "";
 	
 	my %info;
@@ -98,6 +97,12 @@ sub yahoo_request {
 	$base_url .= "?f=".join("",@FIELD_ENCODING)."&e=.csv&s=";
 
 	while (my @symbols = splice(@orig_symbols,0,$MAX_REQUEST_SIZE)) {
+
+		# By pushing an extra symbol on to our array, we can
+		# be sure that everythng ends up with the correct suffix
+		# in the join() below.
+		push(@symbols,"");
+
 		my $url = $base_url . join("$suffix+",@symbols);
 		chop $url;	# Chop off the final +
 		my $response = $ua->request(GET $url);
