@@ -43,9 +43,9 @@ $VERSION = '1.02';
 
 # URLs of where to obtain information.
 
-$TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&unit=all&type=all&sort=5&ss=0&booAutif=0&txtS=');
+$TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&type=all&sort=5&ss=0&booAutif=0&unit=');
 
-$TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp";
+$TRUSTNET_ALL="http://www.trustnet.com/ut/funds/perf.asp";
 
 sub methods { return (uk_unit_trusts => \&trustnet, trustnet => \&trustnet); }
 
@@ -64,14 +64,9 @@ sub trustnet
     my @symbols = @_;
     
     return unless @symbols;
-    my(@q,%aa,$ua,$url,$sym,$ts,$date,$price,$currency,$reply,$trust);
-    my ($row, $datarow, $matches);
+    my(@q,%aa,$ua,$url,$sym,$ts,$price,$currency,$reply,$trust,$trusto,$unittype,$suffix);
+    my ($row, $datarow, $matches, $encoded);
     my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
-    my( $isodate, $day, $month, $year);
-    my %imonth = ( "Jan" => "01", "Feb" => "02", "Mar" => "03",
-                   "Apr" => "04", "May" => "05", "Jun" => "06",
-		   "Jul" => "07", "Aug" => "08", "Sep" => "09",
-		   "Oct" => "10", "Nov" => "11", "Dec" => "12");
     
     my %symbolhash;
     @symbolhash{@symbols} = map(1,@symbols);
@@ -79,8 +74,20 @@ sub trustnet
     for (@symbols) {
       my $te = new HTML::TableExtract( headers => [("Fund Name", "Group Name", "Bid Price", "Offer Price", "Yield")]);
       $trust = $_;
-      $url = "$TRUSTNET_URL$trust";
-      
+      # determine unit type
+      $unittype = "all";
+      $trusto = $trust;   # retain full trust name for gnucash helper
+      $trusto =~ s/(\(INC\)|\(ACC\))$//i; # trust name w/o suffix for trustnet
+      $suffix = $1;
+      if (defined($suffix)) {
+	$unittype = "inc" if ($suffix =~ /\(INC\)/i);
+	$unittype = "acc" if ($suffix =~ /\(ACC\)/i);
+      }
+      $trusto =~ s/\s+$//;
+      $encoded = $trusto;
+      $encoded =~ s/&/%26/g;
+      $url = "$TRUSTNET_URL$unittype&txtS=$encoded";
+
       # print STDERR "Retrieving \"$trust\" from $url\n";
       $ua = $quoter->user_agent;
       $reply = $ua->request(GET $url);
@@ -92,13 +99,27 @@ sub trustnet
       $ts  = ($te->table_states)[0];
       
       if( defined ($ts)) {
-	
+	# check the trust name - first look for an exact match trimming trailing spaces
 	$matches = 0;
 	foreach $row ($ts->rows) {
 	  ($sym = $$row[0]) =~ s/^ +//;
-	  if ($sym =~ /$trust/i) {
+	  $sym =~ s/ +\xA0.+//;
+	  
+	  #  print "Checking <", $sym,  "> for <", $trusto, ">\n";
+	  if ($sym =~ /^$trusto$/i) {
 	    $matches++;
 	    $datarow = $row;
+	    # print "Found exact match\n";
+	  }
+	}
+	# no exact match, so just look for 'starts with'
+	if ($matches == 0) {
+	  foreach $row ($ts->rows) {
+	    ($sym = $$row[0]) =~ s/^ +//;
+	    if ($sym =~ /$trusto/i) {
+	      $matches++;
+	      $datarow = $row;
+	    }
 	  }
 	}
 	if ($matches > 1 ) {
@@ -114,8 +135,8 @@ sub trustnet
 	  $aa {$trust, "exchange"} = "Trustnet";
 	  $aa {$trust, "method"} = "trustnet";
 	  $aa {$trust, "source"} = "http://www.trustnet.co.uk/";
-	  # ($aa {$trust, "name"} = $$datarow[0]) =~ s/^ +//;
-	  $aa {$trust, "name"} = $trust; # no name supplied ... 
+	  ($aa {$trust, "name"} = $$datarow[0]) =~ s/^ +//;
+	  $aa {$trust, "symbol"} = $trust;
 	  ($price = $$datarow[2]) =~ s/\s*\((.*)\)//;
 	  $currency=$1||"GBP";
 	  $aa {$trust, "currency"} = $curr_iso{"$currency"};
@@ -128,15 +149,15 @@ sub trustnet
 	  $aa {$trust, "success"} = 1;
 	  # print STDERR "Trustnet:: Flagging success for $trust\n";
 	  #
-	  # Get date and convert to US format (Ugh!)
-	  $date= "notfound";
-	  if ( $reply->content =~ 
+	  # Trustnet no longer seems to include date in reply as of Nov 03
+	  # Perforce we must default to today's date, though last working day may be more accurate.
+	  # Due to the way UK unit trust prices are calculated, assigning an exact date is problematic anyway.
+	  if ( $reply->content =~
 	       /Source : TrustNet - ([\w\d-]+) - http:\/\/www.trustnet.com/m) {
-	    $isodate=$1;
-	    ($day,$month,$year) = ($isodate =~ /([0-9]+)-(\w+)-([0-9]+)/);
-	    $date = $imonth{$month}."/".$day."/".$year;
+	    $quoter->store_date(\%aa, $trust, {isodate => $1});
+	  } else {
+	    $quoter->store_date(\%aa, $trust, {today => 1});
 	  }
-	  $aa {$trust, "date"} = $date;
 	}
       } else {
 	$aa {$trust, "success"} = 0;
@@ -153,11 +174,6 @@ sub trustnet
 =head1 NAME
 
 Finance::Quote::Trustnet	- Obtain unit trust prices from trustnet.co.uk
-
-=head1 NOTE NOTE NOTE NOTE NOTE
-
-This module is currently non-functional.  Feel free to submit patches,
-though.  :)  http://sourceforge.net/projects/finance-quote
 
 =head1 SYNOPSIS
 

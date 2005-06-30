@@ -6,6 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
+#    Copyright (C) 2004, Johan van Oostrum
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,27 +31,28 @@
 
 require 5.005;
 
-use strict;
+use strict; 
 
 package Finance::Quote::AEX;
 
 use vars qw($VERSION $AEX_URL); 
 
 use LWP::UserAgent;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw(POST);
 use HTML::TableExtract;
+use CGI;
 
-$VERSION = '0.9';
+$VERSION = '1.0';
 
 # URLs of where to obtain information
 
-my $AEX_URL = 'http://www.aex.nl/scripts/pop/kb.asp?';
+my $AEX_URL = 'http://www.aex.nl/scripts/marktinfo/koerszoek.asp'; 
 
 sub methods { return (dutch => \&aex,
 		      aex   => \&aex) } 
 			
 { 
-	my @labels = qw/name last date p_change bid offer open high low close volume currency method exchange time/;
+	my @labels = qw/name last date isodate p_change bid offer open high low close volume currency method exchange time/;
 
 	sub labels { return (dutch => \@labels,
 			     aex   => \@labels); } 
@@ -64,73 +66,120 @@ sub aex {
    
  my (%info,$url,$reply,$te);
  my ($row, $datarow, $matches);
+ my ($time);
 
- my $ua = $quoter->user_agent; 	# user_agent
  $url = $AEX_URL;    		# base url 
+
+# Create a user agent object and HTTP headers
+ my $ua  = new LWP::UserAgent(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
+
+ my $headers = new HTTP::Headers(
+    Accept => "text/html, text/plain, image/*",
+    Content_Type => "application/x-www-form-urlencoded");
  
- foreach my $symbols (@symbols) {
-    $reply = $ua->request(GET $url.join('',"taal=en&alf=",$symbols)); 
-   
-   if ($reply->is_success) { 
-   
-    #print STDERR $reply->content,"\n";
-   
-     $te = new HTML::TableExtract( headers => [("Stock","Time","Volume")]);
- 
-     # parse table
+ foreach my $symbol (@symbols) {
+
+    # Compose form-data
+    my $q = new CGI( {zoek => "$symbol"} );
+    my $form_data = $q->query_string;
+
+    # Compose POST request
+    my $request = new HTTP::Request("POST", $url, $headers);
+    #printf $request . "\n";
+    $request->content( $form_data );
+
+    # Pass request to the user agent and get a response back
+    $reply = $ua->request( $request );
+
+    if ($reply->is_success) { 
+
+     # print STDOUT $reply->content,"\n";
+
+     # Define the headers of the table to be extracted from the received HTML page
+     $te = new HTML::TableExtract( headers => [qw(Fonds Current Change Time Bid Offer Volume High Low Open)]);
+
+     # Parse table
      $te->parse($reply->content); 
      
-     # check for a page without tables.
-     # This gets returned when a bad symbol name is given.
+     # Check for a page without tables
+     # This gets returned when a bad symbol name is given
      unless ( $te->tables ) 
      {
-       $info {$symbols,"succes"} = 0;
-       $info {$symbols,"errormsg"} = "Fund name $symbols not found, bad symbol name";
-     next;
+       $info {$symbol,"success"} = 0;
+       $info {$symbol,"errormsg"} = "Fund name $symbol not found, bad symbol name";
+       next;
      } 
      
      # extract table contents
      my @rows; 
      unless (@rows = $te->rows)
      {
-       $info {$symbols,"success"} = 0;
-       $info {$symbols,"errormsg"} = "Parse error";
+       $info {$symbol,"success"} = 0;
+       $info {$symbol,"errormsg"} = "Parse error";
        next;
      }
-    
-     $info {$symbols, "success"} = 1;
-     $info {$symbols, "exchange"} = "Amsterdam Euronext eXchange";
-     $info {$symbols, "method"} = "aex";
-     $info {$symbols, "name"} = $symbols;
-     ($info {$symbols, "last"} = $rows[0][0]) =~ s/\s*//g; # Remove spaces
-     ($info {$symbols, "bid"} = $rows[1][0]) =~ s/\s*//g; 
-     ($info {$symbols, "offer"} = $rows[2][0]) =~ s/\s*//g;
-     ($info {$symbols, "high"} = $rows[3][0]) =~ s/\s*//g; 
-     ($info {$symbols, "low"} = $rows[4][0]) =~ s/\s*//g;
-     ($info {$symbols, "open"} = $rows[5][0]) =~ s/\s*//g;
-     ($info {$symbols, "close"} = $rows[6][0]) =~ s/\s*//g;
-     ($info {$symbols, "p_change"} = $rows[7][1]) =~ s/\s*//g;
-     ($info {$symbols, "volume"} = $rows[0][2]) =~ s/\s*//g;
-     
-     # Split the date and time from one table entity 
-     ($info {$symbols, "date"} = $rows[0][1]) =~ s/\d{2}:\d{2}//;  
-     ($info {$symbols, "time"} = $rows[0][1]) =~ s/\d{2}\s\w{3}\s\d{4}\s//;
-     
-    # Remove spaces at the front and back of the date 
-     $info {$symbols, "date"} =~ s/^\s*|\s*$//g;
-     $info {$symbols, "time"} =~ s/\s*//g;
-    
-    # convert date from dutch (dd mm yyyy) to US format (mm/dd/yyyy)
-     my @date = split /\s/, $info {$symbols, "date"};
-     $info {$symbols, "date"} = $date[1]."/".$date[0]."/".$date[2]; 
-     
-     $info {$symbols, "currency"} = "EUR";
-     $info {$symbols, "success"} = 1; 
+
+     # search for the fund within the table-rows (as ther might be other
+     # funds having the same fundname in their prefix)
+     my $found = 0;
+     my $i = 0;
+     while ($i < @rows ) {
+       my $a = lc($rows[$i][0]);	# convert to lowercase
+       my $b = lc($symbol);
+       $a =~ s/\s*//g;		# remove spaces
+       $b =~ s/\s*//g;
+       if ($a eq $b) {
+          $found = 1;
+          last
+       }
+       $i++;
+     }
+ 
+     unless ( $found ) 
+     {
+       $info {$symbol,"success"} = 0;
+       $info {$symbol,"errormsg"} = "Fund name $symbol not found";
+       next;
+     }
+
+#    print STDOUT "nr rows: ", $max;
+#    print STDOUT "$found,\n rows[", $i, "][0]: $rows[$i][0], symbol: $symbol\n";
+
+#    $info {$symbol, "success"} = 1;
+     $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+     $info {$symbol, "method"} = "aex";
+     $info {$symbol, "symbol"} = $symbol;
+     ($info {$symbol, "last"} = $rows[$i][1]) =~ s/\s*//g; # Remove spaces
+     ($info {$symbol, "bid"} = $rows[$i][4]) =~ s/\s*//g; 
+     ($info {$symbol, "offer"} = $rows[$i][5]) =~ s/\s*//g;
+     ($info {$symbol, "high"} = $rows[$i][7]) =~ s/\s*//g; 
+     ($info {$symbol, "low"} = $rows[$i][8]) =~ s/\s*//g;
+     ($info {$symbol, "open"} = $rows[$i][9]) =~ s/\s*//g;
+     ($info {$symbol, "close"} = $rows[$i][1]) =~ s/\s*//g;
+     ($info {$symbol, "p_change"} = $rows[$i][2]) =~ s/\s*//g;
+     ($info {$symbol, "volume"} = $rows[$i][6]) =~ s/\s*//g;
+
+# Split the date and time from one table entity 
+     my $dateTime = $rows[$i][3];
+
+# Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34" 
+     if ($dateTime =~ m/(\d{2}) \s ([a-z]{3}) \s (\d{4}) \s
+                        (\d{2}:\d{2})/xi ) { 
+       $quoter->store_date(\%info, $symbol, {month => $2, day => $1, year => $3});
+       $info {$symbol, "time"} = "$4";
+     }
+
+     $info {$symbol, "currency"} = "EUR";
+     $info {$symbol, "success"} = 1; 
    } else {
-     $info {$symbols, "success"} = 0;
-     $info {$symbols, "errormsg"} = "Error retreiving $symbols ";
+     $info {$symbol, "success"} = 0;
+     $info {$symbol, "errormsg"} = "Error retrieving $symbol ";
+#    $info {$symbol, "errormsg"} = $reply->message;
    }
  } 
+
+# print STDOUT("Resultaat:  $reply->message \n Fondsnaam: $symbol");
+
  return %info if wantarray;
  return \%info;
 } 
@@ -146,14 +195,14 @@ Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("aex","asml");  # Only query AEX
-    %info = Finance::Quote->fetch("dutch","phi"); # Failover to other sources OK. 
+    %info = Finance::Quote->fetch("aex","AAB 93-08 7.5");  # Only query AEX
+    %info = Finance::Quote->fetch("dutch","AAB 93-08 7.5"); # Failover to other sources OK 
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Amsterdam Euronext
-eXchange AEX" http://www.aex.nl. All dutch stocks and indices are
-available. 
+eXchange AEX" http://www.aex.nl. Only local Dutch investment funds
+are available. 
 
 This module is loaded by default on a Finance::Quote object. It's 
 also possible to load it explicity by placing "AEX" in the argument

@@ -41,7 +41,7 @@ $VERSION = '0.9';
 my $BMO_URL = 'http://bmonesbittburns.com/QuickQuote/QuickQuote.asp?Symbol=';
 
 sub methods { return (bmonesbittburns => \&bmonesbittburns) } 
-sub labels  { return (bmonesbittburns => [qw/name last p_change bid offer open high low volume currency method exchange date time/]) };
+sub labels  { return (bmonesbittburns => [qw/name last p_change bid offer open high low volume currency method exchange date isodate time/]) };
 			
 # ==============================================================================
 sub bmonesbittburns {
@@ -62,7 +62,7 @@ sub bmonesbittburns {
         
             #print STDERR $reply->content,"\n";
             
-            $te = new HTML::TableExtract( depth => 1);
+            $te = new HTML::TableExtract( depth => 2);
 
             # parse table
             $te->parse($reply->content); 
@@ -75,6 +75,18 @@ sub bmonesbittburns {
                 next;
             } 
             
+	    if (0) {
+	      my ($table, $row);
+
+	      # Old style, using top level methods rather than table state objects.
+	      foreach $table ($te->tables) {
+		print "Table (", join(',', $te->table_coords($table)), "):\n";
+		foreach $row ($te->rows($table)) {
+		  print join(',', @$row), "\n";
+		}
+	      }
+	    }
+
             # extract table contents
             my($ignored, $stock_info, $data) = $te->table_states;
             my(@rows) = $data->rows;
@@ -101,29 +113,32 @@ sub bmonesbittburns {
             $info {$symbol, "exchange"} = "BMO Nesbitt Burns";
             $info {$symbol, "method"} = "bmonesbittburns";
             
-            ($info {$symbol, "last"} = $rows[1][2]) =~ s/\s*//g; # Remove spaces
-            ($info {$symbol, "bid"} = $rows[4][2]) =~ s/\s*//g; 
-            ($info {$symbol, "offer"} = $rows[4][5]) =~ s/\s*//g;
-            ($info {$symbol, "high"} = $rows[7][2]) =~ s/\s*//g; 
-            ($info {$symbol, "low"} = $rows[6][5]) =~ s/\s*//g;
-            ($info {$symbol, "open"} = $rows[6][2]) =~ s/\s*//g;
-            ($info {$symbol, "p_change"} = $rows[2][5]) =~ s/\s*//g;
-            ($info {$symbol, "volume"} = $rows[6][5]) =~ s/\s*//g;
+            ($info {$symbol, "last"}      = $rows[ 1][2]) =~ s/\s*//g; # Remove spaces
+            ($info {$symbol, "p_change"}  = $rows[ 2][5]) =~ s/\s*//g;
+            ($info {$symbol, "close"}     = $rows[ 3][5]) =~ s/\s*//g;
+            ($info {$symbol, "bid"}       = $rows[ 4][2]) =~ s/\s*//g; 
+            ($info {$symbol, "offer"}     = $rows[ 4][5]) =~ s/\s*//g;
+            ($info {$symbol, "open"}      = $rows[ 6][2]) =~ s/\s*//g;
+            ($info {$symbol, "volume"}    = $rows[ 6][5]) =~ s/\s*//g;
+            ($info {$symbol, "high"}      = $rows[ 7][2]) =~ s/\s*//g; 
+            ($info {$symbol, "low"}       = $rows[ 7][5]) =~ s/\s*//g;
+            ($info {$symbol, "eps"}       = $rows[10][2]) =~ s/\s*//g; 
+            ($info {$symbol, "pe"}        = $rows[10][5]) =~ s/\s*//g;
+            ($info {$symbol, "div_yield"} = $rows[12][5]) =~ s/\s*//g;
 
-            # We'll use today's date as default, in case we only have
-	    # a time.
-            my($month, $day, $year) = (localtime())[4,3,5];
-	    $month++;
-	    $year += 1900;
+            $rows[9][2] =~ s/[^\d\.]*//g; # Strip spaces and funky 8-bit characters
+            $rows[9][5] =~ s/[^\d\.]*//g;
+            $info {$symbol, "year_range"} = $rows[9][5] . " - " . $rows[9][2];
 
+	    # This site appears to provide either a date or a time but not both
             my($dt) = $rows[3][2];
             if ($dt =~ /:/) {
                 ($info {$symbol, "time"} = "$dt:00") =~ s/\s*//g; 
-                $info {$symbol, "date"} = "$month/$day/$year";
+		$quoter->store_date(\%info, $symbol, {today => 1});
             }
             else {
-                ($day, $month) = ($dt =~ /([0-9]+)\/([0-9]+)/);
-                ($info {$symbol, "date"} = "$month/$day/$year") =~ s/\s*//g;
+                my ($day, $month) = ($dt =~ /([0-9]+)\/([0-9]+)/);
+		$quoter->store_date(\%info, $symbol, {day => $day, month => $month});
                 $info {$symbol, "time"} = "00:00:00";
             }
 

@@ -163,12 +163,13 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
-		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet Fool AEX Tdwaterhouse
-			       Yahoo::Asia FTPortfolios IndiaMutual
-			       BMONesbittBurns/;
-	}
+		@modules = qw/AEX ASEGR ASX BMONesbittBurns Cdnfundlibrary
+			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
+			      ManInvestments NZX Platinum SEB TSP Tdefunds
+			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
+			      VWD
+			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
+			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
 	$this->_load_modules(@modules,@reqmodules);
 
@@ -538,6 +539,110 @@ sub parse_csv
        return @new;      # list of values that were comma-separated
 }
 
+# =======================================================================
+# parse_csv_semicolon (public object method)
+#
+# Grabbed from the Perl Cookbook. Parsing csv isn't as simple as you thought!
+#
+sub parse_csv_semicolon
+{
+    shift if (ref $_[0]);	# Shift off the object if we have one.
+    my $text = shift;      # record containing comma-separated values
+    my @new  = ();
+
+    push(@new, $+) while $text =~ m{
+        # the first part groups the phrase inside the quotes.
+        # see explanation of this pattern in MRE
+        "([^\"\\]*(?:\\.[^\"\\]*)*)";?
+           |  ([^;]+);?
+           | ;
+       }gx;
+       push(@new, undef) if substr($text, -1,1) eq ';';
+
+       return @new;      # list of values that were comma-separated
+}
+
+# =======================================================================
+# store_date (public object method)
+#
+
+# Given the various pieces of a date, this functions figure out how to
+# store them in both the pre-existing US date format (mm/dd/yyyy), and
+# also in the ISO date format (yyyy-mm-dd).  This function expects to
+# be called with the arguments:
+#
+#	(inforef, symbol_name, data_hash)
+#
+# The components of date hash can be any of:
+#
+#	usdate	 - A date in mm/dd/yy or mm/dd/yyyy
+#	eurodate - A date in dd/mm/yy or dd/mm/yyyy
+#	isodate	 - A date in yy-mm-dd or yyyy-mm-dd
+#	year	 - The year in yyyy
+#	month	 - The month in mm or mmm format (i.e. 07 or Jul)
+#	day	 - The day
+#	today	 - A flag to indicate todays date should be used.
+#
+# The separator for the *date forms is ignored.  It can be any
+# non-alphanumeric character.  Any combination of year, month, and day
+# values can be provided.  Missing fields are filled in based upon
+# today's date.
+#
+sub store_date
+{
+    my $this = shift;
+    my $inforef = shift;
+    my $symbol = shift;
+    my $piecesref = shift;
+
+    my ($year, $month, $day);
+    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+		  jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
+
+#    printf "In store_date\n";
+#    print "inforef $inforef\n";
+#    print "piecesref $piecesref\n";
+#    foreach my $key (keys %$piecesref) {
+#      printf ("  %s: %s\n", $key, $piecesref->{$key});
+#    }
+
+    # Default to today's date.
+    ($month, $day, $year) = (localtime())[4,3,5];
+    $month++;
+    $year += 1900;
+
+    # Proces the inputs
+    if (defined $piecesref->{isodate}) {
+      ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $inforef->{$symbol, "a"} = sprintf ("Defaults: Year %d, Month %s, Day %d\n", $year, $month, $day);
+#      printf ("ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day);
+    }
+
+    if (defined $piecesref->{usdate}) {
+      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+#      printf ("US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year);
+    }
+
+    if (defined $piecesref->{eurodate}) {
+      ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+#      printf ("Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year);
+    }
+
+    if (defined ($piecesref->{year})) {
+      $year = $piecesref->{year};
+      $year += 2000 if $year < 100;
+    }
+    $month = $piecesref->{month} if defined ($piecesref->{month});
+    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
+    $day  = $piecesref->{day} if defined ($piecesref->{day});
+
+    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
+    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
+}
+
 # Dummy destroy function to avoid AUTOLOAD catching it.
 sub DESTROY { return; }
 
@@ -635,7 +740,7 @@ the empty list may be returned, or undef in a scalar context.
 
 With no arguents, this creates a new Finance::Quote object
 with the default methods.  If the environment variable
-FQ_LOAD_QUOTELETS is set, then the contents of FQ_LOAD_QUOTELETS
+FQ_LOAD_QUOTELET is set, then the contents of FQ_LOAD_QUOTELET
 (split on whitespace) will be used as the argument list.  This allows
 users to load their own custom modules without having to change
 existing code.  If you do not want users to be able to load their own
@@ -647,7 +752,7 @@ only the specified modules loaded.  If the first argument is
 "-defaults", then the default modules will be loaded first, followed
 by any other specified modules.
 
-Note that the FQ_LOAD_QUOTELETS environment variable must begin
+Note that the FQ_LOAD_QUOTELET environment variable must begin
 with "-defaults" if you wish the default modules to be loaded.
 
 Any modules specified will automatically be looked for in the
@@ -840,8 +945,8 @@ http://www.gnucash.org/
 =head1 SEE ALSO
 
 Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::Fool,
-Finance::Quote::FTPortfolios,
+Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada, Finance::Quote::Fool,
+Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,

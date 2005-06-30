@@ -2,6 +2,8 @@
 
 #  Cdnfundlibrary.pm
 #
+#  Version 0.6 retrieve more data via different fundlibrary.com url
+#  Version 0.5 made functional again
 #  Version 0.4 fixed up multiple lookup  (March 3, 2001)
 #  Version 0.3 fixed up yield lookup
 #  Version 0.2 functional with Finance::Quote - added error-checking
@@ -19,20 +21,20 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '0.2';
+$VERSION = '0.6';
 
 # URLs of where to obtain information.
 
 $FUNDLIB_URL =
-("http://www.fundlibrary.com/FundCard/FundCard_TFL.cfm?FundID=");
+("http://www.fundlibrary.com/funds/db/_fundcard.asp?t=2&id=");
 $FUNDLIB_MAIN_URL=("http://www.fundlibrary.com");
 
 sub methods { return (canadamutual => \&fundlibrary,
                        fundlibrary => \&fundlibrary); }
 
 {
-    my @labels = qw/method source link name currency last date nav yield
-price/;
+    my @labels = qw/method source link name currency last date isodate nav yield
+		    price net p_change/;
     sub labels { return (canadamutual => \@labels,
                           fundlibrary => \@labels); }
 }
@@ -51,8 +53,7 @@ sub fundlibrary   {
 
     # Local Variables
     my(%fundquote, $mutual);
-    my($ua, $url, $reply, $ts, $row, $rowhd, $te);
-#    my $te = new HTML::TableExtract();
+    my($ua, $url, $reply, $ts, $row, $rowhd, $te, @rows, @ts);
 
     $ua = $quoter->user_agent;
 
@@ -61,70 +62,41 @@ sub fundlibrary   {
       $mutual = $_;
       $url = "$FUNDLIB_URL$mutual";
       $reply = $ua->request(GET $url);
-      $te = new HTML::TableExtract();
+      $te = new HTML::TableExtract(headers => ["Date", "NAVPS"],
+				   slice_columns => 0);
 
-      # Make sure something is returned  ##CAN exit more gracefully -
-add later##
+      # Make sure something is returned  ##CAN exit more gracefully - add later##
       return unless ($reply->is_success);
 
       $te->parse($reply->content);
 
       # Fund name
-      $ts = $te->table_state(0,1);
-      if($ts) {
-          ($row) = $ts->rows;
-          $fundquote {$mutual, "name"} = $$row[0];
+      $reply->content =~ m#<div\s+class="tSmallTitle">([^<]+)</div>#;
+      $fundquote {$mutual, "name"} = $1;
 
+      @rows = $te->rows;
+      if(@rows) {
+          $fundquote {$mutual, "symbol"} = $mutual;
           $fundquote {$mutual, "currency"} = "CAD";
           $fundquote {$mutual, "source"} = $FUNDLIB_MAIN_URL;
           $fundquote {$mutual, "link"} = $url;
           $fundquote {$mutual, "method"} = "fundlibrary";
 
           # Fund price and date
-          $ts = $te->table_state(2,1);
-          ($row) = $ts->rows;
-          if ($$row[1] =~ /^\$.+as of/) {
-              $$row[1] =~ /(\d+\.\d+)/g;
-              $fundquote {$mutual, "price"} =  $1;
-              $fundquote {$mutual, "nav"} = $1;
-              $fundquote {$mutual, "last"} = $1;
+	  $row = $rows[1];
+          $fundquote {$mutual, "price"} =  $$row[2];
+          $fundquote {$mutual, "nav"} = $$row[2];
+          $fundquote {$mutual, "last"} = $$row[2];
+          $fundquote {$mutual, "net"} = $$row[3];
+          $fundquote {$mutual, "p_change"} = $$row[4];
 
-              $$row[1] =~ /(\w+) (\d{1,2})\, (\d{4})/g;
-              $fundquote {$mutual, "date"} =  $1.' '.$2.', '.$3;
+	  $quoter->store_date(\%fundquote, $mutual, {usdate => $$row[0]});
 
-              # Assume things are fine here.
-              $fundquote {$mutual, "success"} = 1;
-          }
-          else {
-              $fundquote {$mutual, "success"} = 0;
-              $fundquote {$mutual, "errormsg"} = "Parse error retrieving
-price and date";
-          }
+          # Assume things are fine here.
+          $fundquote {$mutual, "success"} = 1;
 
           # Performance yield
-          ### Fix up by looking for headers instead
-
-          $ts = $te->table_state(2,3);
-          ($rowhd, $row) = $ts->rows;
-          if ($rowhd && $row) {
-              if ($$row[1] =~ /%/ && $$rowhd[1] =~ /Performance/) {
-                  $$row[1] =~ s/ //g;
-                  $fundquote {$mutual, "yield"} = $$row[1];
-              }
-          }
-          else {
-              $ts = $te->table_state(2,4);
-              ($rowhd, $row) = $ts->rows;
-              if ($rowhd && $row) {
-                  if ($$row[1] =~ /%/ && $$rowhd[1] =~ /Performance/) {
-                      $$row[1] =~ s/ //g;
-                      $fundquote {$mutual, "yield"} = $$row[1];
-                  }
-              }
-              else {
-                  $fundquote {$mutual, "yield"} = "NA";
-              }
-          }
+          $fundquote {$mutual, "yield"} = $$row[5] if ($$row[5] ne "--");
       }
       else {
           $fundquote {$mutual, "success"} = 0;

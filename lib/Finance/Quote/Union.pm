@@ -6,6 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
+#    Copyright (C) 2002, Rainer Dorsch <rainer.dorsch@informatik.uni-stuttgart.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,9 +29,9 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.6 2005/03/20 01:44:13 hampton Exp $
+# $Id: Union.pm,v 1.3 2005/03/20 01:44:13 hampton Exp $
 
-package Finance::Quote::DWS;
+package Finance::Quote::Union;
 require 5.005;
 
 use strict;
@@ -41,25 +42,26 @@ use vars qw/$VERSION/;
 
 $VERSION = '1.00';
 
-sub methods { return (dwsfunds => \&dwsfunds); }
-sub labels { return (dwsfunds => [qw/exchange name date isodate price method/]); }
+sub methods { return (unionfunds => \&unionfunds); }
+sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
 
 # =======================================================================
-# The dwsfunds routine gets quotes of DWS funds (Deutsche Bank Gruppe)
-# On their website DWS provides a csv file in the format
-#    symbol1,price1,date1
-#    symbol2,price2,date2
+# The unionfunds routine gets quotes of UNION funds (Union Invest)
+# On their website UNION provides a csv file in the format
+#    label1,label2,...
+#    name1,symbol1,buy1,bid1,...
+#    name2,symbol2,buy2,bid2,...
 #    ...
 #
 # This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
 
-sub dwsfunds
+sub unionfunds
 {
   my $quoter = shift;
   my @funds = @_;
   return unless @funds;
   my $ua = $quoter->user_agent;
-  my (%fundhash, @q, @date, %info);
+  my (%fundhash, @q, %info, $tempdate);
 
   # create hash of all funds requested
   foreach my $fund (@funds)
@@ -68,32 +70,36 @@ sub dwsfunds
   }
 
   # get csv data
-  my $response = $ua->request(GET &dwsurl);
+  my $response = $ua->request(GET &unionurl);
   if ($response->is_success)
   {
+    # Retrive date.  This comes from the last line of the CSV file.
+    foreach (split('\015?\012',$response->content))
+    {
+      @q = split(/,/) or next;
+      $tempdate=$q[0];
+    }
+
     # process csv data
     foreach (split('\015?\012',$response->content))
     {
-      @q = $quoter->parse_csv($_) or next;
-      if (exists $fundhash{$q[0]})
+#      @q = $quoter->parse_csv($_) or next;
+      @q = split(/,/) or next;
+      next unless (defined $q[1]);
+      if (exists $fundhash{$q[1]})
       {
-        $fundhash{$q[0]} = 1;
+        $fundhash{$q[1]} = 1;
 
-        # convert price from german (0,00) to US format (0.00)
-        $q[1] =~ s/,/\./;
 
-        # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
-        @date = split /\./, $q[2];
-	$quoter->store_date(\%info, $q[0], {month => $date[1], day => $date[0], year => $date[2]});
-
-        $info{$q[0], "exchange"} = "DWS";
-        $info{$q[0], "name"}     = $q[0];
-        $info{$q[0], "symbol"}   = $q[0];
-        $info{$q[0], "price"}    = $q[1];
-        $info{$q[0], "last"}     = $q[1];
-        $info{$q[0], "method"}   = "dwsfunds";
-        $info{$q[0], "currency"} = "EUR";
-        $info{$q[0], "success"}  = 1;
+        $info{$q[1], "exchange"} = "UNION";
+        $info{$q[1], "name"}     = $q[1];
+        $info{$q[1], "symbol"}   = $q[1];
+        $info{$q[1], "price"}    = $q[3];
+        $info{$q[1], "last"}     = $q[3];
+	$quoter->store_date(\%info, $q[1], {eurodate => $tempdate});
+        $info{$q[1], "method"}   = "unionfunds";
+        $info{$q[1], "currency"} = "EUR";
+        $info{$q[1], "success"}  = 1;
       }
     }
 
@@ -119,43 +125,19 @@ sub dwsfunds
   return wantarray() ? %info : \%info;
 }
 
-# DWS provides csv files containing the prices of all their funds for the 5
-# most recent business days. The file names are ordered numerically, that is
-# dws1.csv contains prices for monday, dws2.csv those for tuesday and so on.
-# The files are updated until 6:00pm on every business day. Before that time
-# the file of the previous day has to be used.
-sub dwsurl
+# UNION provides a csv file named preise.csv containing the prices of all
+# their funds for the most recent business day.
+
+sub unionurl
 {
-  # Since DWS is located at Frankfurt/Germany, this code only works for
-  # central european time zone
-  my @time = localtime;
-  my $hour = $time[2];
-  my $wday = $time[6];
-
-  # during weekend use file of friday
-  if ($wday == 6 || $wday == 0)
-  {
-    $wday = 5;
-  }
-  
-  # on business days before 6:00pm use file of previous day
-  else
-  {
-    if ($hour < 18)
-    {
-      $wday--;
-      if ($wday == 0) { $wday = 5; };
-    }
-  }
-
-  return "http://www.dws.de/aktuell/dws".$wday.".csv";
+  return "http://www.union-invest.de/preise.csv";
 }
 
 1;
 
 =head1 NAME
 
-Finance::Quote::DWS	- Obtain quotes from DWS (Deutsche Bank Gruppe).
+Finance::Quote::UNION	- Obtain quotes from UNION (Zurich Financial Services Group).
 
 =head1 SYNOPSIS
 
@@ -163,22 +145,26 @@ Finance::Quote::DWS	- Obtain quotes from DWS (Deutsche Bank Gruppe).
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("dwsfunds","847402");
+    %stockinfo = $q->fetch("unionfunds","975788");
 
 =head1 DESCRIPTION
 
-This module obtains information about DWS managed funds.
+This module obtains information about UNION managed funds.
 
-Information returned by this module is governed by DWS's terms
+Information returned by this module is governed by UNION's terms
 and conditions.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::DWS:
+The following labels may be returned by Finance::Quote::UNION:
 exchange, name, date, price, last.
 
 =head1 SEE ALSO
 
-DWS (Deutsche Bank Gruppe), http://www.dws.de/
+UNION (Union Invest), http://www.union-invest.de/
 
 =cut
+
+
+
+

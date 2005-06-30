@@ -6,6 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
+#    Copyright (C) 2002, Rainer Dorsch <rainer.dorsch@informatik.uni-stuttgart.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,14 +24,12 @@
 #    02111-1307, USA
 #
 #
-# This code derived from Padzensky's work on package Finance::YahooQuote,
+# This code derived from Voler Stuerzl's work on package Finace::Quote::DWS,
 # but extends its capabilites to encompas a greater number of data sources.
 #
-# This code was developed as part of GnuCash <http://www.gnucash.org/>
-#
-# $Id: DWS.pm,v 1.6 2005/03/20 01:44:13 hampton Exp $
+# $Id: ZI.pm,v 1.2 2005/03/20 01:44:13 hampton Exp $
 
-package Finance::Quote::DWS;
+package Finance::Quote::ZI;
 require 5.005;
 
 use strict;
@@ -41,19 +40,20 @@ use vars qw/$VERSION/;
 
 $VERSION = '1.00';
 
-sub methods { return (dwsfunds => \&dwsfunds); }
-sub labels { return (dwsfunds => [qw/exchange name date isodate price method/]); }
+sub methods { return (zifunds => \&zifunds); }
+sub labels { return (zifunds => [qw/exchange name date isodate price method/]); }
 
 # =======================================================================
-# The dwsfunds routine gets quotes of DWS funds (Deutsche Bank Gruppe)
-# On their website DWS provides a csv file in the format
-#    symbol1,price1,date1
-#    symbol2,price2,date2
+# The zifunds routine gets quotes of ZI funds (Zurich Financial Services Group)
+# On their website ZI provides a csv file in the format
+#    label1,label2,...
+#    date1,name1,currency1,buy1,bid1,change to previous day1,symbol1,...
+#    date2,name2,currency2,buy2,bid2,change to previous day2,symbol2,...
 #    ...
 #
 # This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
 
-sub dwsfunds
+sub zifunds
 {
   my $quoter = shift;
   my @funds = @_;
@@ -68,32 +68,30 @@ sub dwsfunds
   }
 
   # get csv data
-  my $response = $ua->request(GET &dwsurl);
+  my $response = $ua->request(GET &ziurl);
   if ($response->is_success)
   {
     # process csv data
     foreach (split('\015?\012',$response->content))
     {
-      @q = $quoter->parse_csv($_) or next;
-      if (exists $fundhash{$q[0]})
+#      @q = $quoter->parse_csv($_) or next;
+      @q = split(/;/) or next;
+      if (exists $fundhash{$q[6]})
       {
-        $fundhash{$q[0]} = 1;
+        $fundhash{$q[6]} = 1;
 
         # convert price from german (0,00) to US format (0.00)
-        $q[1] =~ s/,/\./;
+        $q[4] =~ s/,/\./;
 
-        # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
-        @date = split /\./, $q[2];
-	$quoter->store_date(\%info, $q[0], {month => $date[1], day => $date[0], year => $date[2]});
-
-        $info{$q[0], "exchange"} = "DWS";
-        $info{$q[0], "name"}     = $q[0];
-        $info{$q[0], "symbol"}   = $q[0];
-        $info{$q[0], "price"}    = $q[1];
-        $info{$q[0], "last"}     = $q[1];
-        $info{$q[0], "method"}   = "dwsfunds";
-        $info{$q[0], "currency"} = "EUR";
-        $info{$q[0], "success"}  = 1;
+        $info{$q[6], "exchange"} = "ZI";
+        $info{$q[6], "name"}     = $q[6];
+        $info{$q[6], "symbol"}   = $q[6];
+        $info{$q[6], "price"}    = $q[4];
+        $info{$q[6], "last"}     = $q[4];
+	$quoter->store_date(\%info, $q[6], {eurodate => $q[0]});
+        $info{$q[6], "method"}   = "zifunds";
+        $info{$q[6], "currency"} = $q[2];
+        $info{$q[6], "success"}  = 1;
       }
     }
 
@@ -119,43 +117,19 @@ sub dwsfunds
   return wantarray() ? %info : \%info;
 }
 
-# DWS provides csv files containing the prices of all their funds for the 5
-# most recent business days. The file names are ordered numerically, that is
-# dws1.csv contains prices for monday, dws2.csv those for tuesday and so on.
-# The files are updated until 6:00pm on every business day. Before that time
-# the file of the previous day has to be used.
-sub dwsurl
+# ZI provides a csv file named preise.csv containing the prices of all
+# their funds for the most recent business day.
+
+sub ziurl
 {
-  # Since DWS is located at Frankfurt/Germany, this code only works for
-  # central european time zone
-  my @time = localtime;
-  my $hour = $time[2];
-  my $wday = $time[6];
-
-  # during weekend use file of friday
-  if ($wday == 6 || $wday == 0)
-  {
-    $wday = 5;
-  }
-  
-  # on business days before 6:00pm use file of previous day
-  else
-  {
-    if ($hour < 18)
-    {
-      $wday--;
-      if ($wday == 0) { $wday = 5; };
-    }
-  }
-
-  return "http://www.dws.de/aktuell/dws".$wday.".csv";
+  return "http://www.zuerich-invest.de/preise.csv";
 }
 
 1;
 
 =head1 NAME
 
-Finance::Quote::DWS	- Obtain quotes from DWS (Deutsche Bank Gruppe).
+Finance::Quote::ZI	- Obtain quotes from ZI (Zurich Financial Services Group).
 
 =head1 SYNOPSIS
 
@@ -163,22 +137,26 @@ Finance::Quote::DWS	- Obtain quotes from DWS (Deutsche Bank Gruppe).
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("dwsfunds","847402");
+    %stockinfo = $q->fetch("zifunds","847402");
 
 =head1 DESCRIPTION
 
-This module obtains information about DWS managed funds.
+This module obtains information about ZI managed funds.
 
-Information returned by this module is governed by DWS's terms
+Information returned by this module is governed by ZI's terms
 and conditions.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::DWS:
+The following labels may be returned by Finance::Quote::ZI:
 exchange, name, date, price, last.
 
 =head1 SEE ALSO
 
-DWS (Deutsche Bank Gruppe), http://www.dws.de/
+ZI (Zuerich Invest), http://www.zuerich-invest.de/
 
 =cut
+
+
+
+

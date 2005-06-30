@@ -40,7 +40,7 @@ $VERSION = '1.03';
 
 # URLs of where to obtain information.
 
-$YAHOO_EUROPE_URL = ("http://finance.uk.yahoo.com/d/quotes.csv");
+$YAHOO_EUROPE_URL = ("http://uk.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
@@ -109,6 +109,7 @@ one of the following:
 	ST - Stockholm
 	SG - Stuttgart
 	VA - Valence
+	VI - Vienna
 	DE - Xetra (was FX)
 
 This module provides both the "europe" and "yahoo_europe" methods.

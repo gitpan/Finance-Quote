@@ -58,9 +58,9 @@ $MAX_REQUEST_SIZE = 40;
 
 @FIELDS = qw/symbol name last date time net p_change volume bid ask
              close open day_range year_range eps pe div_date div div_yield
-	     cap ex_div avg_vol/;
+	     cap ex_div avg_vol currency/;
 
-@FIELD_ENCODING = qw/s n l1 d1 t1 c1 p2 v b a p o m w e r r1 d y j1 q a2/;
+@FIELD_ENCODING = qw/s n l1 d1 t1 c1 p2 v b a p o m w e r r1 d y j1 q a2 c4/;
 
 # This returns a list of labels that are provided, so that code
 # that make use of this module can know what it's dealing with.
@@ -78,12 +78,18 @@ sub base_yahoo_labels {
 my %currency_tags = (
 		      # Country		City/Exchange Name
 	US  => "USD", # USA		AMEX, Nasdaq, NYSE
+  	A   => "USD", # USA		American Stock Exchange (ASE)
+  	B   => "USD", # USA		Boston Stock Exchange (BOS)
+  	N   => "USD", # USA		Nasdaq Stock Exchange (NAS)
+  	O   => "USD", # USA		NYSE Stock Exchange (NYS)
   	OB  => "USD", # USA		OTC Bulletin Board
   	PK  => "USD", # USA		Pink Sheets
+  	X   => "USD", # USA		US Options
 	BA  => "ARS", # Argentina	Buenos Aires
-	VA  => "EUR", # Austria		Vienna
+	VI  => "EUR", # Austria		Vienna
   	AX  => "AUD", # Australia
 	SA  => "BRL", # Brazil		Sao Paolo
+  	BR  => "EUR", # Belgium		Brussels
   	TO  => "CAD", # Canada		Toronto
   	V   => "CAD", # 		Toronto Venture
 	SN  => "CLP", # Chile		Santiago
@@ -105,6 +111,7 @@ my %currency_tags = (
 	CL  => "INR", # 		Calcutta
 	NS  => "INR", # 		National Stock Exchange
 	JK  => "IDR", # Indonesia	Jakarta
+  	I   => "EUR", # Ireland		Dublin
 	TA  => "ILS", # Israel		Tel Aviv
   	MI  => "EUR", # Italy		Milan
 	KS  => "KRW", # Korea		Stock Exchange
@@ -113,15 +120,18 @@ my %currency_tags = (
 	MX  => "MXP", # Mexico
 	NZ  => "NZD", # New Zealand
   	AS  => "EUR", # Netherlands	Amsterdam
-  	OS  => "NOK", # Norway		Oslo
+  	OL  => "NOK", # Norway		Oslo
 	LM  => "PEN", # Peru		Lima
+	IN  => "EUR", # Portugal	Lisbon
 	SI  => "SGD", # Singapore
 	BC  => "EUR", # Spain		Barcelona
 	BI  => "EUR", # 		Bilbao
 	MF  => "EUR", # 		Madrid Fixed Income
 	MC  => "EUR", # 		Madrid SE CATS
 	MA  => "EUR", # 		Madrid
+	VA  => "EUR", # 		Valence
   	ST  => "SEK", # Sweden		Stockholm
+  	S   => "CHF", # Switzerland	Zurich
 	TW  => "TWD", # Taiwan		Taiwan Stock Exchange
 	TWO => "TWD", # 		OTC
 	BK  => "THB", # Thialand	Thailand Stock Exchange
@@ -147,6 +157,8 @@ sub yahoo_request {
 	# The suffix is used to specify particular markets.
 	my $suffix = shift || "";
 	
+	my $uses_semicolon = shift || 0;
+
 	my %info;
 	my $ua = $quoter->user_agent;
 
@@ -170,7 +182,12 @@ sub yahoo_request {
 		# the hash now.
 
 		foreach (split('\015?\012',$response->content)) {
-			my @q = $quoter->parse_csv($_);
+			my @q;
+			if ($uses_semicolon) {
+				@q = $quoter->parse_csv_semicolon($_);
+			} else {
+				@q = $quoter->parse_csv($_);
+			}
 			my $symbol = $q[0];
 			my ($exchange) = $symbol =~ m/\.([A-Z]+)/;
 
@@ -183,7 +200,10 @@ sub yahoo_request {
 			# loads all the returned fields into our hash.
 
 			for (my $i=0; $i < @FIELDS; $i++) {
-				$info{$symbol,$FIELDS[$i]} = $q[$i];
+				# Every now and then on a failed
+				# retrieval, Yahoo will drop in an
+				# undefined field
+				$info{$symbol,$FIELDS[$i]} = $q[$i] if defined $q[$i];
 			}
 
 			# Yahoo returns a line filled with N/A's if we
@@ -201,6 +221,10 @@ sub yahoo_request {
 				$info{$symbol,"success"} = 1;
 			}
 
+			# Whack the dates.  This will add an isodate,
+			# and regularize the us date.
+			$quoter->store_date(\%info, $symbol, {usdate => $info{$symbol,"date"}});
+
 			$info{$symbol,"price"} = $info{$symbol,"last"};
 
 			# Remove spurious percentage signs in p_change.
@@ -215,21 +239,29 @@ sub yahoo_request {
 				$info{$symbol, "high"} = $2;
 			}
 
-			# Determine the currency from the exchange name.
-			# Symbols without an exchange are in USD. Symbols
-			# starting with a hat are always indexes, so they
-			# don't have a currency.
-			if (defined($exchange)) {
-			  $info{$symbol,"currency"} = $currency_tags{$exchange};
-			} elsif (substr($symbol,0,1) ne "^") {
-			  $info{$symbol,"currency"} = "USD";
+			if (defined($info{$symbol,"currency"})) {
+			  # Convert the currency to be all uppercase for
+			  # backward compatability.  Needed because Yahoo
+			  # returns GBP as GBp.  There may be others.
+			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/
+			} else {
+			  # Determine the currency from the exchange name.
+			  # Symbols without an exchange are in USD. Symbols
+			  # starting with a hat are always indexes, so they
+			  # don't have a currency.
+			  if (defined($exchange)) {
+			    $info{$symbol,"currency"} = $currency_tags{$exchange};
+			  } elsif (substr($symbol,0,1) ne "^") {
+			    $info{$symbol,"currency"} = "USD";
+			  }
+			  $info{$symbol,"currency_set_by_fq"} = 1;
 			}
 
 			# Convert prices (when needed). E.G. London sources
 			# return in pence. We'd like them to return in pounds
 			# (divide by 100).
 			if (defined($exchange)) {
-			  if ($exchange eq "L") {
+			  if ($exchange eq "L" || $exchange eq "TA") {
 			    foreach my $field ($quoter->default_currency_fields) {
 			      next unless ($info{$symbol,$field});
 			      $info{$symbol,$field} =
@@ -249,6 +281,11 @@ sub yahoo_request {
 	# place, don't you think?
 
 	foreach my $key (keys %info) {
+	  if (!defined $info{$key}) {
+	    printf STDERR "\n";
+	    printf STDERR "$key points to undefined value\n";
+	    printf STDERR "\n";
+	  }
 		$info{$key} =~ s/<[^>]*>//g;
 		$info{$key} =~ s/&nbsp;.*$//;
 		undef $info{$key} if (defined($info{$key}) and 

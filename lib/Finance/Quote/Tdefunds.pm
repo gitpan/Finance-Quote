@@ -22,7 +22,7 @@
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #    02111-1307, USA
 #
-package Finance::Quote::Tdwaterhouse;
+package Finance::Quote::Tdefunds;
 require 5.005;
 
 use strict;
@@ -39,23 +39,23 @@ $VERSION = '1.00';
 
 #$TD_URL = ("http://tdfunds.tdam.com/tden/FundProfile/FundProfile.cfm");
 #$TD_URL = ("http://tdfunds.tdam.com/tden/Download/v_DownloadProcess.cfm?SortField=FundName&SortOrder=ASC&Nav=No&Group=99&WhereClause=Where%20FC%2EFund%5FClass%5FORDER%20%3C%2099%20and%20TD%2ERisk%5FCat%5FID%20%21%3D%204&DownloadType=CSV");
-$TD_URL = ("http://www.tdassetmanagement.com/TDAMFunds/Download/v_Download.asp?TAB=PRICE&PID=5&DT=csv&SORT=TDAM_FUND_NAME&FT=all&MAP=N&SI=4");
+$TD_URL = ("http://www.tdassetmanagement.com/TDAMFunds/Download/v_Download.asp?TAB=PRICE&PID=10&DT=csv&SORT=TDAM_FUND_NAME&FT=all&MAP=N&SI=4");
 
 my(%currencies) = (
 	"CDN"	=>	"CAD",
 	"US"	=>	"USD"
 );
 
-sub methods { return (tdwaterhouse => \&tdwaterhouse); }
+sub methods { return (tdefunds => \&tdefunds); }
 
-sub labels { return (tdwaterhouse => [qw/method exchange name nav date isodate price/]); }
+sub labels { return (tdefunds => [qw/method exchange name nav date isodate price/]); }
 
 # =======================================================================
 
 #
 # Converts a description to a stock-like symbol
 #
-sub tdwaterhouse_create_symbol {
+sub tdefunds_create_symbol {
 	my($name) = shift;
 
 	# Take out any bad characters
@@ -72,7 +72,7 @@ sub tdwaterhouse_create_symbol {
 #
 # Maps the provided currency, where possible, to the correct ISO code.
 #
-sub tdwaterhouse_get_currency {
+sub tdefunds_get_currency {
     my($currency) = shift;
 
     $currency =~ s/\$//g;
@@ -85,7 +85,7 @@ sub tdwaterhouse_get_currency {
     return $currency;
 }
 
-sub tdwaterhouse
+sub tdefunds
 {
     my $quoter = shift;
     my(@q,%aa,$ua,$url,$sym,$price);
@@ -108,11 +108,11 @@ sub tdwaterhouse
 	    # make sure what we get looks like an acceptable stock symbol
 	    # only allow a-z + '.' + "^"
 	    my($name) = $sym;
-            $sym = &tdwaterhouse_create_symbol($sym);
+            $sym = &tdefunds_create_symbol($sym);
 
 	    # $sym =~ tr/a-z/A-Z/;
 	    $aa {$sym, "exchange"} = "TD Waterhouse";  # TRP
-	    $aa {$sym, "method"} = "tdwaterhouse";
+	    $aa {$sym, "method"} = "tdefunds";
 	    $aa {$sym, "name"} = $name;
 	    $price = $q[3];
 	    $price =~ s/\$//;
@@ -121,7 +121,7 @@ sub tdwaterhouse
 	    $quoter->store_date(\%aa, $sym, {usdate => $q[2]});
 	    $aa {$sym, "nav"} = $aa{$sym,"last"};
 	    $aa {$sym, "success"} = 1;
-	    $aa {$sym, "currency"} = &tdwaterhouse_get_currency($q[4]);
+	    $aa {$sym, "currency"} = &tdefunds_get_currency($q[4]);
         } else {
 	    $aa {$sym, "success"} = 0;
 	    $aa {$sym, "errormsg"} = "Fund lookup failed.";
@@ -136,7 +136,7 @@ sub tdwaterhouse
 
 =head1 NAME
 
-Finance::Quote::Tdwaterhouse	- Obtain quotes from TD Waterhouse Canada
+Finance::Quote::Tdefunds	- Obtain quotes from TD Waterhouse Efunds
 
 =head1 SYNOPSIS
 
@@ -144,21 +144,21 @@ Finance::Quote::Tdwaterhouse	- Obtain quotes from TD Waterhouse Canada
 
     $q = Finance::Quote->new;
 
-    %quotes = $q->tdwaterhouse ("TD AmeriGrowth RSP");
-    $date = $quotes {"TD AmeriGrowth RSP", "date"};
-    $nav = $quotes {"TD AmeriGrowth RSP", "nav"};
-    print "TD AmeriGrowth RSP for $date: NAV = $nav\n";
-    $nav = $quotes {"TD AmeriGrowth RSP", "nav"};
+    %quotes = $q->tdefunds ("TD Canadian Index");
+    $date = $quotes {"TD Canadian Index", "date"};
+    $nav = $quotes {"TD Canadian Index", "nav"};
+    print "TD Canadian Index $date: NAV = $nav\n";
+    $nav = $quotes {"TD Canadian Index", "nav"};
 
 =head1 DESCRIPTION
 
 This module obtains information about managed funds from TD
-Waterhouse Canada. All TD Waterhouse funds are downloaded at once. 
+Waterhouse Canada Efunds. All TD Waterhouse efunds are downloaded at once. 
 
-The symbols for each mutual fund are the names of the fund with any
+The symbols for each efund are the names of the efund with any
 unusal characters (not a letter, space or period) removed. For example;
-a fund called "TD Health Sciences ($US)" would have the symbol
-"TD Health Sciences US". 
+a fund called "TD US Index ($US)" would have the symbol
+"TD US Index US". 
 
 =head1 LABELS RETURNED
 
