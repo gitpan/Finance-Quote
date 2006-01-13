@@ -1,4 +1,5 @@
 ChangeLog
+ChangeLog.1
 Documentation/FAQ
 Documentation/Hackers-Guide
 Documentation/License
@@ -16,6 +17,7 @@ lib/Finance/Quote/ASEGR.pm
 lib/Finance/Quote/ASX.pm
 lib/Finance/Quote/BMONesbittBurns.pm
 lib/Finance/Quote/Cdnfundlibrary.pm
+lib/Finance/Quote/Deka.pm
 lib/Finance/Quote/DWS.pm
 lib/Finance/Quote/FTPortfolios.pm
 lib/Finance/Quote/Fidelity.pm
@@ -34,6 +36,7 @@ lib/Finance/Quote/Troweprice.pm
 lib/Finance/Quote/Trustnet.pm
 lib/Finance/Quote/Union.pm
 lib/Finance/Quote/UserAgent.pm
+lib/Finance/Quote/USFedBonds.pm
 lib/Finance/Quote/VWD.pm
 lib/Finance/Quote/Yahoo/Asia.pm
 lib/Finance/Quote/Yahoo/Australia.pm
@@ -42,7 +45,7 @@ lib/Finance/Quote/Yahoo/Brasil.pm
 lib/Finance/Quote/Yahoo/Europe.pm
 lib/Finance/Quote/Yahoo/NZ.pm
 lib/Finance/Quote/Yahoo/USA.pm
-lib/Finance/Quote/ZI.pm
+lib/Finance/Quote/ZA.pm
 test/Use.t
 test/aex.t
 test/asegr.t
@@ -50,6 +53,7 @@ test/asx.t
 test/bmonesbittburns.t
 test/cdnfundlibrary.t
 test/currency.t
+test/deka.t
 test/dws.t
 test/fidelity.t
 test/ftportfolios.t
@@ -65,6 +69,7 @@ test/troweprice.t
 test/trustnet.t
 test/tsp.t
 test/union.t
+test/usfedbonds.t
 test/vanguard.t
 test/vwd.t
 test/yahoo.t
@@ -73,3 +78,5 @@ test/yahoo_australia.t
 test/yahoo_brasil.t
 test/yahoo_europe.t
 test/yahoo_nz.t
+test/za.t
+META.yml                                 Module meta-data (added by MakeMaker)

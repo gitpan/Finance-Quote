@@ -6,7 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
-#    Copyright (C) 2003,2005 Jörg Sommer <joerg@alea.gnuu.de>
+#    Copyright (C) 2003,2005,2006 Jörg Sommer <joerg@alea.gnuu.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -76,7 +76,8 @@ sub trim
 }
 
 # Trim leading and tailing whitespaces, leading + and tailing % and
-# translate german separators into english separators
+# translate german separators into english separators. Also removes
+# the thousands separator in returned values.
 sub trimtr
 {
     $_ = shift();
@@ -84,6 +85,7 @@ sub trimtr
     s/^\s*\+?//;
     s/\%?\s*$//;
     tr/,./.,/;
+    s/,//g;
     return $_;
 }
 
@@ -100,7 +102,7 @@ sub vwd
     $info{$fund, "source"} = "VWD";
     $info{$fund, "success"} = 0;
     $info{$fund, "errormsg"} = "Parse error";
-    
+
     my $response = $ua->get("http://www.finanztreff.de/ftreff/".
 	"kurse_einzelkurs_uebersicht.htm?s=".$fund);
     if ($response->is_success)
@@ -109,10 +111,10 @@ sub vwd
       # addressing, because colspan in table head hides columns in all rows
       my $table = new HTML::TableExtract
 	  (decode=>0, headers=>["Stammdaten"])->parse($response->content);
-      unless ($table->first_table_state_found()) {
-	print "table doesn't exist 2\n";
+
+      unless ($table->tables) {
 	$info{$fund, "success"}  = 0;
-	$info{$fund, "errormsg"} = "Parse error";
+	$info{$fund, "errormsg"} = "Invalid symbol: $fund";
 	next;
       }
       my $tabOffset = $table->first_table_state_found()->count() - 2;
@@ -125,7 +127,7 @@ sub vwd
       $info{$fund, "symbol"}   = trim( $rows[4][1] );
       $info{$fund, "name"}     = trim( $rows[1][1] );
       $info{$fund, "currency"} = trim( $rows[8][1] );
-	
+
       # parse table "Jahreschart" and extract its contents
       @rows = new HTML::TableExtract
 	  (depth => 2, count => 3+$tabOffset)->parse($response->content)->rows();
@@ -138,21 +140,21 @@ sub vwd
 	  (decode=>0, depth=>2, count=>4+$tabOffset)->parse($response->content)->rows();
 
       next unless (@rows);
-      $info{$fund, "price"} = $info{$fund, "last"} = trimtr( $rows[4][1] );
+      $info{$fund, "exchange"} = trimtr( $rows[0][1] );
+      $info{$fund, "price"} = $info{$fund, "last"} = trimtr( $rows[1][1] );
       $info{$fund, "net"} = trimtr( $rows[2][2] );
       ($info{$fund, "time"}) = ($rows[1][0] =~ /(\d{1,2}:\d{1,2}:\d{1,2})/);
       $info{$fund, "p_change"} = trimtr( $rows[1][2] );
       $info{$fund, "year_range"} = trimtr($rows[8][1])." - ".trimtr($rows[8][2]);
       $info{$fund, "bid"} = trimtr( $rows[4][1] );
       $info{$fund, "ask"} = trimtr( $rows[5][1] );
-	
+
       # parse table "Fondsdaten" and extract its contents
       @rows = new HTML::TableExtract
 	  (decode=>0, depth=>2, count=>5+$tabOffset)->parse($response->content)->rows();
 
       next unless (@rows);
-      $info{$fund, "exchange"} = trimtr( $rows[2][1] );
-	
+
       $info{$fund, "success"}  = 1;
       $info{$fund, "errormsg"} = "";
     } else {

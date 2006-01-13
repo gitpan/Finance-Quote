@@ -35,19 +35,22 @@ use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
+use HTML::TableExtract;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
 	    $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
+$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit=Convert&";
+# If the above URL ever fails, try rewriting this module to use the URL below.
+# $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/q?s=USDCAD%3DX";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.10';
+$VERSION = '1.11';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -163,11 +166,11 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		@modules = qw/AEX ASEGR ASX BMONesbittBurns Cdnfundlibrary
+		@modules = qw/AEX ASEGR ASX BMONesbittBurns Cdnfundlibrary Deka
 			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
 			      ManInvestments NZX Platinum SEB TSP Tdefunds
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      VWD
+			      USFedBonds VWD ZA
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
@@ -235,8 +238,15 @@ sub currency {
 
 	my $ua = $this->user_agent;
 
-	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></th><th>1</th><th(?: nowrap)?>[^<]+</th><t[dh]>(\d+\.\d+)</t[dh]>#;
+	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
+	my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
+	$te->parse($data);
+
+	# Make sure there's a table to parse.
+	return undef unless ($te->tables);
+
+	my $row = ($te->rows())[0];
+	my ($exchange_rate) = $$row[1];
 
 	{
 		local $^W = 0;	# Avoid undef warnings.
