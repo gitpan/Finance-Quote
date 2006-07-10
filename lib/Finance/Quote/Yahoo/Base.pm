@@ -203,7 +203,10 @@ sub yahoo_request {
 				# Every now and then on a failed
 				# retrieval, Yahoo will drop in an
 				# undefined field
-				$info{$symbol,$FIELDS[$i]} = $q[$i] if defined $q[$i];
+				next unless (defined $q[$i]);
+				$info{$symbol,$FIELDS[$i]} = $q[$i];
+				$info{$symbol,$FIELDS[$i]} = "N/A"
+				    unless (length $q[$i]);
 			}
 
 			# Yahoo returns a line filled with N/A's if we
@@ -261,7 +264,8 @@ sub yahoo_request {
 			# return in pence. We'd like them to return in pounds
 			# (divide by 100).
 			if (defined($exchange)) {
-			  if ($exchange eq "L" || $exchange eq "TA") {
+			  if (($exchange eq "L"  && $info{$symbol,"currency"} eq "GBP") ||
+			      ($exchange eq "TA")) {
 			    foreach my $field ($quoter->default_currency_fields) {
 			      next unless ($info{$symbol,$field});
 			      $info{$symbol,$field} =

@@ -44,6 +44,7 @@ use vars qw/$MANINV_URL $VERSION/;
 $VERSION = "0.1";
 
 $MANINV_URL = 'http://www.maninvestments.com.au/index.cfm?action=productprices&cat_id=5';
+$MANINV_URL = 'http://www.maninvestments.com.au/netassetvalues-print.cfm';
 
 sub methods {return (maninv => \&maninv)}
 
@@ -76,7 +77,7 @@ sub maninv {
 	return wantarray() ? %info : \%info;
     }
 
-    my $tel = HTML::TableExtract->new(headers => [qw(Fund Net Rising)]);
+    my $tel = HTML::TableExtract->new(headers => [qw(Product Net Rising)]);
     $tel->parse($response->content);
 
     foreach my $ts ($tel->table_states) {
@@ -89,7 +90,7 @@ sub maninv {
 
 
 	# Extract table contents.
-	my @rows;
+	my (@rows, @tmp_rows);
 	unless (@rows = $te->rows) {
 	    foreach my $stock (@stocks) {
 		$info{$stock,"success"} = 0;
@@ -101,10 +102,22 @@ sub maninv {
 #	    print(join(',',@$row),"\n");
 #	}
 
+	# Discard the header row.
+	shift @rows;
+
+	# The new version of the web site puts the name on one
+	# line and the rest of the data on the next line.
+	while (@rows) {
+	    my $row1 = shift @rows;
+	    my $row2 = shift @rows;
+	    splice(@$row2, 0, 1, shift(@$row1));
+	    push @tmp_rows, $row2;
+	}
+	@rows = @tmp_rows;
+
 	# Pack the resulting data into our structure.
-	my $date_list;
 	foreach my $row (@rows) {
-	    my $name = shift(@$row);
+	    my $name = @$row[0];
 	    $name =~ tr/\000-\040\200-\377/ /s;
 	    $name =~ s/^ *//;
 	    $name =~ s/ *$//;
@@ -124,11 +137,6 @@ sub maninv {
 		       'OM-IP Strategic Series 2 Ltd' => 'OMIPS2S',
 		       'OM-IP Hedge Plus Ltd' => 'OMIPHP');
 	    
-	    if (!defined($date_list)) {
-		local $_ = $$row[0];
-		tr/\000-\040\200-\377/ /s;
-		($date_list) = /Net Asset Value as at (.*)$/;
-	    }
 
 	    # Delete spaces and '*' which sometimes appears after the code.
 	    # Also delete high bit characters.
@@ -136,14 +144,14 @@ sub maninv {
 	    if (! $stock) { next};
 	    $info{$stock,'symbol'} = $stock;
 	    $info{$stock,'name'} = $name;
-	    $info{$stock,'nav'} = shift(@$row);
+	    $info{$stock, "currency"} = @$row[1];
+	    $quoter->store_date(\%info, $stock, {eurodate => @$row[3]});
+	    $info{$stock,'nav'} = @$row[4];
 	    $info{$stock,'nav'} =~ tr/ $\000-\037\200-\377//d; 
 	    $info{$stock,'last'} = $info{$stock,'nav'};
-	    $info{$stock, "currency"} = "AUD";
 	    $info{$stock, "method"} = "maninv";
 	    $info{$stock, "exchange"} = "Man Investments Australia";
 	    $info{$stock, "success"} = 1;
-	    $quoter->store_date(\%info, $stock, {eurodate => $date_list}) if defined($date_list);
 #	    print $info{$stock,'symbol'};
 #	    foreach my $label (qw/name nav last date currency method exchange success/) {
 #		print ", ", $info{$stock,$label};

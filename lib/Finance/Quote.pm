@@ -50,7 +50,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.11';
+$VERSION = '1.12';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -166,9 +166,9 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		@modules = qw/AEX ASEGR ASX BMONesbittBurns Cdnfundlibrary Deka
-			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
-			      ManInvestments NZX Platinum SEB TSP Tdefunds
+		@modules = qw/AEX ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
+			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
+			      LeRevenu ManInvestments NZX Platinum SEB TSP Tdefunds
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
 			      USFedBonds VWD ZA
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil

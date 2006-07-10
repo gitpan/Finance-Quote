@@ -1,3 +1,102 @@
+2006-06-27  David Hampton  <hampton@employees.org>
+
+	* Makefile.PL: State the dependency on Crypt::SSLeay that several
+	modules now have.
+
+	* lib/Finance/Quote/Yahoo/Base.pm: Don't set fields that are
+	defined but are empty..
+
+	* test/yahoo_brasil.t: Update the test module to have more cases
+	and use better stocks.
+
+	* lib/Finance/Quote/Yahoo/Brasil.pm: Update for the change of the
+	data separator from a semicolon to a comma.
+
+	* test/financecanada.t:
+	* test/hex.t: Add new test cases to cover the last untested
+	modules. All modules are now tested.
+
+	* lib/Finance/Quote/FinanceCanada.pm: Don't set the success flag
+	if the lookup failed.
+
+	* lib/Finance/Quote/Platinum.pm: Use the new url of the pricing
+	information.
+
+	* lib/Finance/Quote/ManInvestments.pm: Update for the new table
+	format on the web site.
+
+	* test/indiamutual.t:
+	* test/aex.t: Update the test cases to use currently listed funds.
+
+	* lib/Finance/Quote/ManInvestments.pm: The url for updating
+	quotes has changed, as has the table header.
+
+	* lib/Finance/Quote/Bourso.pm:
+	* lib/Finance/Quote/LeRevenu.pm:
+	* test/bourso.t:
+	* test/lerevenu.t: Updated modules from Dominique Corbex
+	<domcox@sourceforge.net>. The name field now returns the real name
+	and not ticker symbols, and other small fixes.
+
+2006-04-08  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Trustnet.pm: Work around the fact that gnucash
+	escapes the ampersand character when passing stock names to F::Q.
+
+	* lib/Finance/Quote/DWS.pm: Updated module from Klaus Dahlke
+	<klaus.dahlke@gmx.de> to retrieve quotes from the new DWS web
+	page.
+
+	* lib/Finance/Quote/Tiaacref.pm: Explicitly state in the code that
+	this module requires ssl support (it uses an https:// url).  This
+	prevents perl from trying to run the code when ssl support isn't
+	present.
+
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/HEX.pm: 
+	* test/hex.t: New module from Mika Laari
+	<mikalaari@users.sourceforge.net> to fetch quote information from
+	the Helsinki stock exchange.
+
+	* Documentation/Hackers-Guide: Add a section on the q->store_date()
+	function.  All modules should use this function to set the 'date'
+	and 'isodate' fields based on the retrieved textual date (or lack
+	thereof).
+	
+	* test/lerevenu.t: Test the right module.
+
+2006-04-07  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/LeRevenu.pm:
+	* test/lefrevenu.t: New module from Dominique Corbex
+	<domcox@sourceforge.net> to fetch information from the
+	LeRevenu.com site in France.
+
+	* t/yahoo_europe.t: New test cases for non-GBP London exchange
+	stocks.  Use new stock for test of the XETRA exchange.  (Can't
+	find a non-Euro stock there, so remove those tests.)
+
+	* lib/Finance/Quote/Yahoo/Base.pm: Patch from p1n0@sourceforge.net
+	to only divide London exchange values by 100 if they are
+	denominated in pence.
+
+2006-04-06  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/Bourso.pm:
+	* test/bourso.t: New module from Dominique Corbex
+	<domcox@sourceforge.net> to fetch information from the "Paris
+	Stock Exchange", http://www.boursorama.com.
+
+	* lib/Finance/Quote/VWD.pm: Updated module from Jörg Sommer that
+	is more tolerant of the advertising added to the web page.
+
+2006-01-11  David Hampton  <hampton@employees.org>
+
+	* CVSTAG: finance_quote_1_11
+	* lib/Finance/Quote.pm: Updated $VERSION to 1.01
+
 2006-01-10  David Hampton  <hampton@employees.org>
 
 	* test/dws.t: 
