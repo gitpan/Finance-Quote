@@ -50,7 +50,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.12';
+$VERSION = '1.13';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -166,10 +166,10 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		@modules = qw/AEX ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
+		@modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
 			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
-			      LeRevenu ManInvestments NZX Platinum SEB TSP Tdefunds
-			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
+			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
+			      TSP Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
 			      USFedBonds VWD ZA
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
@@ -605,7 +605,7 @@ sub store_date
     my $symbol = shift;
     my $piecesref = shift;
 
-    my ($year, $month, $day);
+    my ($year, $month, $day, $this_month, $year_specified);
     my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
 		  jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
 
@@ -620,11 +620,14 @@ sub store_date
     ($month, $day, $year) = (localtime())[4,3,5];
     $month++;
     $year += 1900;
+    $this_month = $month;
+    $year_specified = 0;
 
     # Proces the inputs
     if (defined $piecesref->{isodate}) {
       ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
+      $year_specified = 1;
       $inforef->{$symbol, "a"} = sprintf ("Defaults: Year %d, Month %s, Day %d\n", $year, $month, $day);
 #      printf ("ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day);
     }
@@ -632,22 +635,27 @@ sub store_date
     if (defined $piecesref->{usdate}) {
       ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
       $year += 2000 if $year < 100;
+      $year_specified = 1;
 #      printf ("US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year);
     }
 
     if (defined $piecesref->{eurodate}) {
       ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
+      $year_specified = 1;
 #      printf ("Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year);
     }
 
     if (defined ($piecesref->{year})) {
       $year = $piecesref->{year};
       $year += 2000 if $year < 100;
+      $year_specified = 1;
     }
     $month = $piecesref->{month} if defined ($piecesref->{month});
     $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
     $day  = $piecesref->{day} if defined ($piecesref->{day});
+
+    $year-- if (($year_specified == 0) && ($this_month < $month));
 
     $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
     $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;

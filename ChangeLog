@@ -1,3 +1,80 @@
+2007-01-07  David Hampton  <hampton@employees.org>
+
+	* CVSTAG: finance_quote_1_13
+
+	* lib/Finance/Quote.pm: Update version to 1.13.
+
+	* lib/Finance/Quote.pm: Update the store_date() function for the
+	case when the year isn't explicitly stated.  If the specified
+	month would put the quote in the future, then consider this a
+	quite from last year.  manly intended to handle the rollover from
+	December to January on web sites that don't specify the year.
+	Suggestion from Christian Lupien.
+
+	* lib/Finance/Quote/BMONesbittBurns.pm: Enhance module to support
+	mutual fund quotes (which have less data than stock quotes).
+	Correct date format parsing.  Fix from Christian Lupien <lupien at
+	users.sourceforge.net>.
+
+	* lib/Finance/Quote/StockHouseCanada.pm: The fund name seems to be
+	a moving target. Search all tables of depth one looking for it.
+
+2007-01-01  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/FTPortfolios.pm: Rewrite this module for the
+	new web site design.
+
+	* lib/Finance/Quote/TSP.pm: Strip spaces around the dollar values.
+
+	* lib/Finance/Quote/FinanceCanada.pm: Rewrite this module for the
+	new web site design.
+
+	* test/*.t: Some restructuring of tests.  Add a couple more tests
+	on dates.  Replace a couple of test stocks that are no longer
+	valid.
+
+	* test/*.t: Accept last year as a valid date.  Comes in hand when
+	testing modules at the start of the new year.
+
+	* lib/Finance/Quote/ZA.pm: Update for changes in the display of
+	the web site.
+
+2006-12-31  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/StockHouseCanada.pm:
+	* test/stockhousecanada.t: New module for getting Canadian Mutual
+	fund quotes from Chris Carton <ctcarton@gmail.com>.
+
+	* lib/Finance/Quote/Deka.pm: Update for changes in the display
+	of the web site.  Now uses an https url.
+
+	* lib/Finance/Quote/LeRevenu.pm: Updates from Dominique Corbex for
+	changes in the display of the web site.
+
+	* lib/Finance/Quote/Trustnet.pm: Update for changes in the display
+	of the web site.
+
+2006-09-11  David Hampton  <hampton@employees.org>
+
+	* Move AIA.pm to AIAHK.pm since AIA has sites in multiple
+	countries.
+
+2006-09-10  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/AIA.pm:
+	* test/aia.pm: New module to access American International
+	Assurance fund information.  Based on perl script from Wouter van
+	Marle <wouter@squirrel-systems.com>.
+
+	* lib/Finance/Quote/Bourso.pm: Update the URL to track changes on
+	the web site.
+
+2006-07-10  David Hampton  <hampton@cisco.com>
+
+	* lib/Finance/Quote.pm: Update version to 1.12.
+
+	* CVSTAG: finance_quote_1_12
+
 2006-06-27  David Hampton  <hampton@employees.org>
 
 	* Makefile.PL: State the dependency on Crypt::SSLeay that several
