@@ -1,14 +1,30 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Finance-Quote
-version:      1.13
-version_from: lib/Finance/Quote.pm
-installdirs:  site
-requires:
-    Crypt::SSLeay:                 0
-    HTML::TableExtract:            0
-    HTTP::Request::Common:         0
-    LWP::UserAgent:                0
-
+---
+abstract: 'Get stock and mutual fund quotes from various exchanges'
+author:
+  - 'Paul Fenwick <pjf@cpan.org>'
+build_requires:
+  Test::More: 0
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+generated_by: 'Module::Install version 0.77'
+license: gpl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Finance-Quote
+no_index:
+  directory:
+    - inc
+    - t
+    - examples
+requires:
+  Crypt::SSLeay: 0
+  HTML::TableExtract: 0
+  HTTP::Request::Common: 0
+  LWP::UserAgent: 0
+  perl: 5.005
+resources:
+  MailingList: https://lists.sourceforge.net/lists/listinfo/finance-quote-devel
+  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
+  homepage: http://finance-quote.sourceforge.net/
+  repository: http://github.com/pfenwick/finance-quote/
+version: 1.13_01

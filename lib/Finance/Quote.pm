@@ -50,7 +50,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.13';
+$VERSION = '1.13_01';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -169,8 +169,8 @@ sub new {
 		@modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
 			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
 			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
-			      TSP Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      USFedBonds VWD ZA
+			      TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
+			      USFedBonds VWD ZA Cominvest
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
@@ -247,6 +247,9 @@ sub currency {
 
 	my $row = ($te->rows())[0];
 	my ($exchange_rate) = $$row[1];
+        $exchange_rate =~ s/,// ; # solve a bug when conversion rate
+                                  # involves thousands. yahoo inserts
+                                  # a comma when thousands occur
 
 	{
 		local $^W = 0;	# Avoid undef warnings.
@@ -912,7 +915,7 @@ more flexible $hash{$stock}{$label} style format.
 There is no way to override the default behaviour to cache currency
 conversion rates.
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT & LICENSE
 
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
@@ -939,17 +942,17 @@ module.  Please refer to the sub-modules for further information.
 
 =head1 AUTHORS
 
-  Dj Padzensky (C<djpadz@padz.net>), PadzNet, Inc.
-  Linas Vepstas (C<linas@linas.org>)
-  Yannick LE NY (C<y-le-ny@ifrance.com>)
-  Paul Fenwick (C<pjf@schools.net.au>)
-  Brent Neal (C<brentn@users.sourceforge.net>)
-  Volker Stuerzl (C<volker.stuerzl@gmx.de>)
-  Keith Refson (C<Keith.Refson#earth.ox.ac.uk>)
-  Rob Sessink (C<rob_ses@users.sourceforge.net>)
-  Leigh Wedding (C<leigh.wedding@telstra.com>)
-  Tobias Vancura (C<tvancura@altavista.net>)
-  James Treacy (C<treacy@debian.org>)
+  Dj Padzensky <djpadz@padz.net>, PadzNet, Inc.
+  Linas Vepstas <linas@linas.org>
+  Yannick LE NY <y-le-ny@ifrance.com>
+  Paul Fenwick <pjf@cpan.org>
+  Brent Neal <brentn@users.sourceforge.net>
+  Volker Stuerzl <volker.stuerzl@gmx.de>
+  Keith Refson <Keith.Refson#earth.ox.ac.uk>
+  Rob Sessink <rob_ses@users.sourceforge.net>
+  Leigh Wedding <leigh.wedding@telstra.com>
+  Tobias Vancura <tvancura@altavista.net>
+  James Treacy <treacy@debian.org>
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/

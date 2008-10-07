@@ -44,7 +44,7 @@ use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.03';
+$VERSION = '1.13_01';
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because
@@ -204,6 +204,11 @@ sub yahoo_request {
 				# retrieval, Yahoo will drop in an
 				# undefined field
 				next unless (defined $q[$i] && length $q[$i]);
+                                # remove trailing spaces added for
+                                # yahoo::europe quotes, since currency
+                                # is returned with a trailing white
+                                # space
+                                $q[$i] =~ s/\s*$// ;
 				$info{$symbol,$FIELDS[$i]} = $q[$i];
 			}
 

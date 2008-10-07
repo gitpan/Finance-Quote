@@ -14,7 +14,7 @@ use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-$VERSION = '0.1';
+$VERSION = '1.13_01';
 
 # URLs of where to obtain information.
 
@@ -71,7 +71,7 @@ sub amfiindia   {
 	next if !/\;/;
 	chomp;
 	s/\r//;
-	my ($symbol, @data) = split /\;/;
+        my ($symbol, @data) = split /\s*\;\s*/;
 	$allquotes{$symbol} = \@data;
     }
     close(NAV);
