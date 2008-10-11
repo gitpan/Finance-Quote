@@ -68,6 +68,7 @@ t/01-pod.t
 t/02-pod-coverage.t
 t/03-kwalitee.t
 t/04-critic.t
+t/05-data-dumper.t
 t/aex.t
 t/aiahk.t
 t/asegr.t
