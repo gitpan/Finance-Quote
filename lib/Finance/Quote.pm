@@ -50,7 +50,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.13_02';
+$VERSION = '1.14';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -170,7 +170,7 @@ sub new {
 			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
 			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
 			      TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      USFedBonds VWD ZA Cominvest
+			      USFedBonds VWD ZA Cominvest Finanzpartner
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
@@ -664,6 +664,22 @@ sub store_date
     $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
 }
 
+sub isoTime {
+  my ($self,$timeString) = @_ ;
+  $timeString =~ tr/ //d ;
+  $timeString = uc $timeString ;
+  my $retTime = "00:00"; # return zero time if unparsable input
+  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
+    my ($hours,$mins)= ($1,$2) ;
+    $hours+=12 if ($3 && ($3 eq "PM")) ;
+    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
+      $retTime = $hours>=10 ? "$hours:" : "0$hours:" ;
+      $retTime.= $mins>=10 ? "$mins" :"0$mins" ;
+    }
+  }
+  return $retTime;
+}
+
 # Dummy destroy function to avoid AUTOLOAD catching it.
 sub DESTROY { return; }
 
@@ -896,6 +912,13 @@ be scaled but any surrounding text preserved.  It's most useful in writing
 new Finance::Quote modules where you may retrieve information in a
 non-ISO4217 unit (such as cents) and would like to scale it to a more
 useful unit (like dollars).
+
+=head2 ISOTIME
+
+    $q->isoTime("11:39PM");    # returns "23:39"
+    $q->isoTime("9:10 AM");    # returns "09:10"
+
+This function will return a isoformatted time
 
 =head1 ENVIRONMENT
 

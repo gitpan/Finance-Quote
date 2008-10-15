@@ -44,7 +44,7 @@ use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.13_02';
+$VERSION = '1.14';
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because
@@ -245,11 +245,19 @@ sub yahoo_request {
 				$info{$symbol, "high"} = $2;
 			}
 
+                        if (defined($info{$symbol,"time"})) {
+                          # uniform time output
+                          $info{$symbol,"time"} = $quoter->isoTime($info{$symbol,"time"});
+                        }
+
 			if (defined($info{$symbol,"currency"})) {
 			  # Convert the currency to be all uppercase for
 			  # backward compatability.  Needed because Yahoo
 			  # returns GBP as GBp.  There may be others.
 			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/;
+                          # yahoo started to return GBX instead of GBP
+                          # somewhere arround 9 oct 2008.
+                          $info{$symbol,"currency"} =~ s/GBX/GBP/;
 #			  printf "Currency %s specified by Yahoo\n", $info{$symbol,"currency"};
 			} else {
 			  # Determine the currency from the exchange name.
