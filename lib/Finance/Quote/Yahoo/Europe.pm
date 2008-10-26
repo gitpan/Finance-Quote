@@ -36,7 +36,7 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_EUROPE_URL);
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 
 # URLs of where to obtain information.
 
@@ -110,7 +110,7 @@ one of the following:
 	BC - Barcelona
 	BE - Berlin
 	BI - Bilbao
-	BR - Breme
+	BR - Brussels
 	CO - Copenhagen
 	D  - Dusseldorf
 	F  - Frankfurt

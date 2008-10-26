@@ -14,7 +14,7 @@ use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 
 # URLs of where to obtain information.
 
@@ -77,7 +77,8 @@ sub amfiindia   {
     close(NAV);
 
     foreach my $symbol (@symbols) {
-	$fundquote{$symbol, "currency"} = "INR";
+        $fundquote{$symbol, "symbol"} = $symbol;
+        $fundquote{$symbol, "currency"} = "INR";
 	$fundquote{$symbol, "source"} = $AMFI_MAIN_URL;
 	$fundquote{$symbol, "link"} = $url;
 	$fundquote{$symbol, "method"} = "amfitable";

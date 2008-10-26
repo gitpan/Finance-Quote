@@ -28,4 +28,4 @@ resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
   homepage: http://finance-quote.sourceforge.net/
   repository: http://github.com/pfenwick/finance-quote/
-version: 1.14
+version: 1.15
