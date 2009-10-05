@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Tobias Vancura <tvancura@altavista.net>
 #
@@ -40,7 +40,7 @@ use Exporter;
 
 use vars qw/$FOOL_URL $VERSION @FIELDS $MAX_REQUEST_SIZE @ISA/;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 $FOOL_URL = 'http://quote.fool.com/quotes.csv?symbols=';
 

@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Leigh Wedding <leigh.wedding@telstra.com>
 #    Copyright (C) 2003, Ian Dall <ian@beware.dropbear.id.au>
@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$MANINV_URL $VERSION/;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 $MANINV_URL = 'http://www.maninvestments.com.au/index.cfm?action=productprices&cat_id=5';
 $MANINV_URL = 'http://www.maninvestments.com.au/netassetvalues-print.cfm';

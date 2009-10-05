@@ -14,13 +14,14 @@ use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 # URLs of where to obtain information.
 
 #$AMFI_MAIN_URL = ("http://localhost/");
 $AMFI_MAIN_URL = ("http://amfiindia.com/");
-$AMFI_URL = ("${AMFI_MAIN_URL}downloadnavopen.asp");
+$AMFI_URL = ("${AMFI_MAIN_URL}NavReport.aspx?type=0");
+#$AMFI_URL = ("${AMFI_MAIN_URL}spages/NAV0.txt"); This page seems to do the job also. Keep for reference
 $AMFI_NAV_LIST = "/tmp/amfinavlist.txt";
 
 sub methods { return (indiamutual => \&amfiindia,
