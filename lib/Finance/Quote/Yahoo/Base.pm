@@ -44,7 +44,7 @@ use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because
@@ -144,7 +144,7 @@ my %currency_tags = (
 # This function expects a Finance::Quote object, a base URL to use,
 # a refernece to a list of symbols to lookup.  If a fourth argument is
 # used then it will act as a suffix that needs to be appended to the stocks
-# in order to obtain the correct information.  This function relies upon 
+# in order to obtain the correct information.  This function relies upon
 # the fact that the various Yahoo's all work the same way.
 
 sub yahoo_request {
@@ -156,7 +156,7 @@ sub yahoo_request {
 
 	# The suffix is used to specify particular markets.
 	my $suffix = shift || "";
-	
+
 	my $uses_semicolon = shift || 0;
 
 	my %info;
@@ -250,6 +250,14 @@ sub yahoo_request {
                           $info{$symbol,"time"} = $quoter->isoTime($info{$symbol,"time"});
                         }
 
+                        # "cap" from Yahoo::USA sometimes has "B" for
+                        # billions suffix, eg. from "F" Ford -- expand that
+                        # to a plain number for ease of use
+                        if (defined($info{$symbol,"cap"})) {
+                          $info{$symbol,"cap"}
+                            = $quoter->B_to_billions ($info{$symbol,"cap"});
+                        }
+
       # Convert prices (when needed). E.G. Some London sources
       # return in pence. Yahoo denotes this with GBP vs GBp
       # We'd like them to return in pounds (divide by 100).
@@ -324,6 +332,7 @@ sub yahoo_request {
 	return %info if wantarray;
 	return \%info;
 }
+
 
 1;
 

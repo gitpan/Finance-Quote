@@ -48,14 +48,14 @@
 # 2006-09-02  Dominique Corbex <domcox@sourceforge.net>
 #
 #     * (1.3) changes on web site
-# 
+#
 # 2006-06-28  Dominique Corbex <domcox@sourceforge.net>
 #
-#     * (1.2) changes on web site 
+#     * (1.2) changes on web site
 #
 # 2006-02-22  Dominique Corbex <domcox@sourceforge.net>
 #
-#     * (1.0) iniial release 
+#     * (1.0) iniial release
 #
 
 
@@ -71,7 +71,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder; # Boursorama doesn't put data in table elements anymore but uses <div>
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
 
@@ -87,8 +87,14 @@ sub methods { return ( france => \&bourso,
                        europe => \@labels); }
 }
 
-sub bourso {
+sub bourso_to_number {
+  my $x = shift(@_);
+  $x =~ s/\s//g ; # remove spaces etc in number
+  return $x;
+}
 
+
+sub bourso {
   my $quoter = shift;
   my @stocks = @_;
   my (%info,$reply,$url,$te,$ts,$row,$style);
@@ -120,8 +126,8 @@ sub bourso {
 		  next ;
 		};
 
-		my $symbol = $symbolline[0]->as_text;
-		($symbol) = ($symbol=~m/(\w+)-/);
+		my $symbol = ($symbolline[0]->content_list)[0];
+		($symbol) = ($symbol=~m/(\w+)/);
 		$info{$stocks,"symbol"}=$symbol;
 
 		# retrieve NAME
@@ -139,33 +145,84 @@ sub bourso {
         # set method
         $info{$stocks,"method"} = "bourso" ;
 
+		#holds table data
+		my %tempinfo;
+
 		# retrieve other data
 		my $infoclass = ($tree->look_down('class','info1'))[0];
 		unless ($infoclass) {
-		  $info {$stocks,"success"} = 0;
-		  $info {$stocks,"errormsg"} = "$stocks retrieval not supported.";
-		  next ;
-		};
+		  my $opcvm = ($tree->look_down('id','opcvm_headerFund_0'))[0];
+		  unless ($opcvm) {
+			$info {$stocks,"success"} = 0;
+			$info {$stocks,"errormsg"} = "$stocks retrieval not supported.";
+			next ;
+		  }
 
-		my $keys = ($infoclass->look_down('class','t01'))[0]; # this div contains all keys
-		my $data = ($infoclass->look_down('class','t03'))[0]; # this div contains all values
-		my @keys = $keys->look_down('_tag','li');
-		my @values = $data->look_down('_tag','li');
+		  # the stock is a delayed OPCVM
 
-		my %tempinfo; #holds table data
+		  my $infoelem = ($tree->look_down('id','content-gauche'))[0];
+		  $infoelem = ($infoelem->look_down('class','TabContenu'))[0];
 
-		foreach my $i (0..$#keys) {
-		  my $keytext = ($keys[$i])->as_text;
-		  my $valuetext = ($values[$i])->as_text;
-		  $tempinfo{$keytext} = $valuetext;
+		  my @rows = $infoelem->look_down('_tag','tr');
+		  foreach my $i (0..$#rows) {
+			my $row = $rows[$i];
+			unless($row->attr('class')) {
+			  next;
+			}
+
+			my @cells = $row->look_down('_tag','td');
+			my $keytext = ($cells[0])->as_text;
+			my $valuetext = ($cells[2])->as_text;
+
+			$tempinfo{$keytext} = $valuetext;
+		  }
+		}
+		else {
+		  # regular stock
+
+		  my $infoelem = ($infoclass->look_down('class','info-valeur'))[0];
+
+		  my @rows = $infoelem->look_down('_tag','tr');
+		  foreach my $i (0..$#rows) {
+			my $row = $rows[$i];
+			my @cells = $row->look_down('_tag','td');
+			my $j = 0;
+			if ($cells[0]->attr('rowspan')) {
+			  $j = 1;
+			}
+			if ($cells[0]->attr('colspan')) {
+			  next;
+			}
+
+			my $keytext = ($cells[$j])->as_text;
+			my $valuetext = ($cells[$j + 1])->as_text;
+
+			$tempinfo{$keytext} = $valuetext;
+		  }
 		}
 
 		foreach my $key (keys %tempinfo) {
 		  # print "$key -> $tempinfo{$key}\n";
 
 		ASSIGN:	for ( $key ) {
+			# OPCVM
+			/Valeur liquidative/ && do {
+			  my ($last, $currency) = ($tempinfo{$key} =~ m/(\d+(?:\s\d+)*(?:\.\d+)?)(?:\(c\))?(?:\s+(\w+))?/);
+			  $last = bourso_to_number($last);
+			  $info{$stocks,"last"} = $last;
+			  $info{$stocks,"currency"} = $currency;
+			};
+			/Date/ && do {
+			  $info{$stocks,"date"} = $tempinfo{$key};
+			  $quoter->store_date(\%info, $stocks, {eurodate => $info{$stocks,"date"}});
+			};
+			/Variation Veille/ && do {
+			  $info{$stocks,"p_change"}=$tempinfo{$key}
+			};
+			# REGULAR STOCK
 			/Cours/ && do {
-			  my ($last, $currency) = ($tempinfo{$key} =~ m/(\d*.?\d*)\(c\)\s*(\w*)/);
+			  my ($last, $currency) = ($tempinfo{$key} =~ m/(\d+(?:\s\d+)*(?:\.\d+)?)(?:\(c\))?(?:\s+(\w+))?/);
+			  $last = bourso_to_number($last);
 			  $info{$stocks,"last"} = $last;
 			  $info{$stocks,"currency"} = $currency||"EUR"; # defaults to EUR
               my $exchange = $key;
@@ -175,27 +232,26 @@ sub bourso {
 			/Variation/ && do {
 			  $info{$stocks,"p_change"}=$tempinfo{$key}
 			};
-			/Dernier echange/ && do {
+			/Dernier .change/ && do {
 			  my ($day,$month,$year) = ( $tempinfo{$key} =~ m|(\d\d)/(\d\d)/(\d\d)| );
 			  $year+=2000;
 			  $info{$stocks,"date"}= sprintf "%02d/%02d/%04d",$day,$month,$year;
 			  $quoter->store_date(\%info, $stocks, {eurodate => $info{$stocks,"date"}});
 			};
 			/Volume/ && do {
-			  $info{$stocks,"volume"}= $tempinfo{$key} ;
-			  $info{$stocks,"volume"} =~ s/\s//g ; # remove spaces etc in number
+			  $info{$stocks,"volume"}=bourso_to_number($tempinfo{$key});
 			};
 			/Ouverture/ && do {
-			  $info{$stocks,"open"}=$tempinfo{$key}
+			  $info{$stocks,"open"}=bourso_to_number($tempinfo{$key});
 			};
 			/Haut/ && do {
-			  $info{$stocks,"high"}=$tempinfo{$key}
+			  $info{$stocks,"high"}=bourso_to_number($tempinfo{$key});
 			};
 			/Bas/ && do {
-			  $info{$stocks,"low"}=$tempinfo{$key}
+			  $info{$stocks,"low"}=bourso_to_number($tempinfo{$key});
 			};
-			/Cloture veille/ && do {
-			  $info{$stocks,"previous"}=$tempinfo{$key}
+			/Cl.ture veille/ && do {
+			 $info{$stocks,"previous"}=bourso_to_number($tempinfo{$key});
 			};
 			/Valorisation/ && do {
 			  $info{$stocks,"cap"}=$tempinfo{$key} ;
@@ -257,5 +313,3 @@ volume, currency, method, exchange, symbol.
 Boursorama (french web site), http://www.boursorama.com
 
 =cut
-
-	

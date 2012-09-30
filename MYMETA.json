@@ -1,0 +1,47 @@
+{
+   "abstract" : "Get stock and mutual fund quotes from various exchanges",
+   "author" : [
+      ", Dj Padzensky, Paul Fenwick <pjf@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120630",
+   "license" : [
+      "open_source"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Finance-Quote",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.36",
+            "Test::More" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Crypt::SSLeay" : "0",
+            "HTML::TableExtract" : "0",
+            "HTML::TreeBuilder" : "0",
+            "HTTP::Request::Common" : "0",
+            "LWP::UserAgent" : "0",
+            "perl" : "5.005"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "1.18"
+}

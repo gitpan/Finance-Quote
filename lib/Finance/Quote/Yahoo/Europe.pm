@@ -36,7 +36,7 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_EUROPE_URL);
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -141,6 +141,11 @@ Finance::Quote->new().
 
 Information obtained by this module may be covered by Yahoo's terms
 and conditions.  See http://finance.uk.yahoo.com/ for more details.
+
+=head1 SPECIFIC NOTES ON CERTAIN SYMBOLS
+
+Starting in November 2010, the Yahoo site didn't respond to ^DJI symbol
+retrieval. Use ^DJI.US instead.
 
 =head1 LABELS RETURNED
 

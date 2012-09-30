@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 27;
+plan tests => 29;
 
 # Test Yahoo_europe functions.
 
@@ -38,11 +38,11 @@ ok(! $quotes{"BOGUS","success"});
 
 # London stocks can be returned in a variety of currencies
 
-my %londonquotes = $q->fetch("yahoo_europe","BAY.L");
-ok($londonquotes{"BAY.L","success"});
-ok($londonquotes{"BAY.L","currency"} eq "GBP");
-ok(($londonquotes{"BAY.L","currency"} eq "GBP") &&
-   !defined($londonquotes{"BAY.L","currency_set_by_fq"}));
+my %londonquotes = $q->fetch("yahoo_europe","ATG.L");
+ok($londonquotes{"ATG.L","success"});
+ok($londonquotes{"ATG.L","currency"} eq "GBP");
+ok(($londonquotes{"ATG.L","currency"} eq "GBP") &&
+   !defined($londonquotes{"ATG.L","currency_set_by_fq"}));
 
 %londonquotes = $q->fetch("yahoo_europe","CCR.L");
 ok($londonquotes{"CCR.L","success"});
@@ -83,3 +83,13 @@ ok($xetraquotes{"A0GFY7.SG","success"});
 ok($xetraquotes{"A0GFY7.SG","currency"} eq "EUR");
 ok(($xetraquotes{"A0GFY7.SG","currency"} eq "EUR") &&
    !defined($xetraquotes{"A0GFY7.SG","currency_set_by_fq"}));
+
+TODO: {
+    # Yahoo does not provide retrieval of ^DJI.US quotes since it lost
+    # license for it. ^DJI can only be viewed on the html page anymore. We
+    # need to write a HTML page scraper for this case
+    local $TODO = "^DJI not returned by yahoo anymore.";
+    %xetraquotes = $q->fetch("yahoo_europe","%40%5EDJI.US");
+    ok($xetraquotes{"^DJI","success"});
+    ok($xetraquotes{"^DJI","currency"} eq "USD");
+}
