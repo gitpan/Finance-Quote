@@ -38,11 +38,11 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_ASIA_URL);
 
-$VERSION = '1.18';
+$VERSION = '1.19';
 
 # URLs of where to obtain information.
 
-$YAHOO_ASIA_URL = ("http://sg.finance.yahoo.com/d/quotes.csv");
+$YAHOO_ASIA_URL = ("http://download.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (asia => \&yahoo_asia,yahoo_asia => \&yahoo_asia)};
 

@@ -23,10 +23,15 @@ no_index:
     - t
 requires:
   Crypt::SSLeay: 0
+  Encode: 0
   HTML::TableExtract: 0
   HTML::TreeBuilder: 0
   HTTP::Request::Common: 0
+  JSON: 0
   LWP::UserAgent: 0
+  Mozilla::CA: 0
+  POSIX: 0
+  URI::Escape: 0
   perl: 5.005
 resources:
   MailingList: https://lists.sourceforge.net/lists/listinfo/finance-quote-devel
@@ -34,4 +39,4 @@ resources:
   homepage: http://finance-quote.sourceforge.net/
   license: http://opensource.org/licenses/gpl-license.php
   repository: http://github.com/pfenwick/finance-quote/
-version: 1.18
+version: 1.19

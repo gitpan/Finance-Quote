@@ -38,9 +38,14 @@ author(
 
 requires(       'LWP::UserAgent'            => 0);
 requires(       'Crypt::SSLeay'             => 0);
+requires(       'Mozilla::CA'               => 0);
 requires(       'HTTP::Request::Common'     => 0);
 requires(       'HTML::TableExtract'        => 0);
 requires(       'HTML::TreeBuilder'         => 0);
+requires(       'Encode'                    => 0);
+requires(       'JSON'                      => 0);
+requires(       'URI::Escape'               => 0);
+requires(       'POSIX'                     => 0);
 
 test_requires(  'Test::More'                => 0);
 
