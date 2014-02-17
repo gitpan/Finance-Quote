@@ -23,6 +23,7 @@ no_index:
     - t
 requires:
   Crypt::SSLeay: 0
+  Date::Calc: 0
   Encode: 0
   HTML::TableExtract: 0
   HTML::TreeBuilder: 0
@@ -39,4 +40,4 @@ resources:
   homepage: http://finance-quote.sourceforge.net/
   license: http://opensource.org/licenses/gpl-license.php
   repository: http://github.com/pfenwick/finance-quote/
-version: 1.19
+version: 1.20
