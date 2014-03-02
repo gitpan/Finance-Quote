@@ -37,7 +37,7 @@ use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-our $VERSION = '1.22'; # TRIAL VERSION
+our $VERSION = '1.23_01'; # TRIAL VERSION
 
 sub methods { return (nz => \&nzx, nzx => \&nzx); }
 sub labels {
