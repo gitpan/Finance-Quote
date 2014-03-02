@@ -23,7 +23,7 @@ use LWP::UserAgent;
 use POSIX;
 use URI::Escape;
 
-our $VERSION = '1.24'; # VERSION
+our $VERSION = '1.25'; # VERSION
 
 my @markets = qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
 my @labels = qw/ask bid currency date exchange last method source success symbol time timezone/;
