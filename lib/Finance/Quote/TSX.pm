@@ -41,7 +41,7 @@ use HTML::TableExtract;
 use URI;
 use URI::QueryParam;
 
-our $VERSION = '1.23_01'; # TRIAL VERSION
+our $VERSION = '1.23_02'; # TRIAL VERSION
 
 # This URL is able to accept up to 10 symbols at a time
 my $TSX_URL = URI->new('http://cxa.marketwatch.com/tsx/en/market/getquote.aspx');

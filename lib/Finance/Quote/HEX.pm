@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$HEX_URL /;
 
-our $VERSION = '1.23_01'; # TRIAL VERSION
+our $VERSION = '1.23_02'; # TRIAL VERSION
 
 $HEX_URL = 'http://omxgroup.is-teledata.com/html/securitypricelistequities.html?language=fi';
 
