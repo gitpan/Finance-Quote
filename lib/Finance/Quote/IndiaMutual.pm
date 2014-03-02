@@ -7,14 +7,14 @@ require 5.004;
 
 use strict;
 
-use vars qw($VERSION $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
+use vars qw( $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+our $VERSION = '1.21'; # TRIAL VERSION
 
 # URLs of where to obtain information.
 

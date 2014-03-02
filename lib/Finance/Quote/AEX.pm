@@ -37,14 +37,14 @@ use strict;
 
 package Finance::Quote::AEX;
 
-use vars qw($VERSION $AEX_URL);
+use vars qw( $AEX_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common qw(POST);
 use HTML::TableExtract;
 use CGI;
 
-$VERSION = '1.20' ;
+our $VERSION = '1.21'; # TRIAL VERSION
 
 # URLs of where to obtain information
 

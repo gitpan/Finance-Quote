@@ -24,13 +24,13 @@ use strict;
 
 package Finance::Quote::BSERO;
 
-use vars qw($VERSION $BSERO_URL);
+use vars qw( $BSERO_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+our $VERSION = '1.21'; # TRIAL VERSION
 
 my $BSERO_URL = 'http://www.bvb.ro/mobile/m_SecurityDetails.aspx?';
 

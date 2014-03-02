@@ -38,9 +38,7 @@ use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-use vars qw/$VERSION/;
-
-$VERSION = '1.20' ;
+our $VERSION = '1.21'; # TRIAL VERSION
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }

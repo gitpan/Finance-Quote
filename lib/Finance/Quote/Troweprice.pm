@@ -32,13 +32,13 @@ require 5.005;
 
 use strict;
 
-use vars qw($VERSION $TROWEPRICE_URL);
+use vars qw( $TROWEPRICE_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.20' ;
+our $VERSION = '1.21'; # TRIAL VERSION
 
 # URLs of where to obtain information.
 

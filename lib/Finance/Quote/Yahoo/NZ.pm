@@ -32,9 +32,9 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
-use vars qw/$VERSION $YAHOO_NZ_URL/;
+use vars qw/$YAHOO_NZ_URL/;
 
-$VERSION = '1.20' ;
+our $VERSION = '1.21'; # TRIAL VERSION
 
 # URLs of where to obtain information.
 
