@@ -39,7 +39,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-our $VERSION = '1.21'; # TRIAL VERSION
+our $VERSION = '1.22'; # TRIAL VERSION
 
 # URLs of where to obtain information.
 
