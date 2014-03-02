@@ -40,7 +40,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder;
 
-our $VERSION = '1.23_02'; # TRIAL VERSION
+our $VERSION = '1.24'; # VERSION
 
 sub methods { return (vwd => \&vwd); }
 sub labels { return (vwd => [qw/currency date isodate

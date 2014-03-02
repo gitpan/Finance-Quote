@@ -22,7 +22,7 @@ use HTML::TableExtract;
 
 require Crypt::SSLeay;
 
-our $VERSION = '1.23_02'; # TRIAL VERSION
+our $VERSION = '1.24'; # VERSION
 my $DEKA_URL = "https://www.deka.de/dn/useCases/fundsearch/UCFundsSearch.shtml?ACTION_FIELD=quickSearch";
 
 sub methods {return (deka        => \&deka);}

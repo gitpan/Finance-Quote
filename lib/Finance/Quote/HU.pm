@@ -26,7 +26,7 @@ use HTML::TableExtract;
 use Encode;
 use Storable qw(dclone);
 
-our $VERSION = '1.23_02'; # TRIAL VERSION
+our $VERSION = '1.24'; # VERSION
 
 my %MONTHS = (
 	"JAN","01","FEB","02","MAR","03","APR","04","MAY","05","JUN","06","JUL","07","AUG","08","SEP","09","OCT","10","NOV","11","DEC","12");

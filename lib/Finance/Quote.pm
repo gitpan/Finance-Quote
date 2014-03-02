@@ -36,7 +36,7 @@ use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
-use Data::Dumper;
+# use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT %MODULES %METHODS $AUTOLOAD
@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-our $VERSION = '1.23_02'; # TRIAL VERSION
+our $VERSION = '1.24'; # VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -173,14 +173,14 @@ sub new {
   if (!@reqmodules or $reqmodules[0] eq "-defaults") {
     shift(@reqmodules) if (@reqmodules);
     # Default modules
-    @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso Cdnfundlibrary
-            Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool HU
-            GoldMoney HEX
-            IndiaMutual LeRevenu ManInvestments Morningstar MorningstarJP MtGox NZX Platinum SEB
-            SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
-            Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
-            Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
-            Yahoo::USA/; }
+    @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso
+            Cdnfundlibrary Citywire Currencies Deka DWS FTPortfolios Fidelity
+            FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
+            ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
+            SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
+            Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
+            VWD ZA Cominvest Finanzpartner Yahoo::Asia Yahoo::Australia
+            Yahoo::Brasil Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
   $this->_load_modules(@modules,@reqmodules);
 
