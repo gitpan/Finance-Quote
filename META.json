@@ -63,7 +63,7 @@
             "URI::QueryParam" : "0",
             "base" : "0",
             "constant" : "0",
-            "perl" : "5.006",
+            "perl" : "5.010",
             "strict" : "0",
             "utf8" : "0",
             "vars" : "0",
@@ -93,6 +93,6 @@
          "web" : "https://github.com/finance-quote/finance-quote"
       }
    },
-   "version" : "1.25"
+   "version" : "1.26"
 }
 

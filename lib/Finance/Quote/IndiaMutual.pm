@@ -3,7 +3,7 @@
 # Version 0.1 preliminary version using Cdnfundlibrary.pm v0.4 as an example
 
 package Finance::Quote::IndiaMutual;
-require 5.004;
+require 5.010;
 
 use strict;
 
@@ -14,7 +14,7 @@ use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-our $VERSION = '1.25'; # VERSION
+our $VERSION = '1.26'; # VERSION
 
 # URLs of where to obtain information.
 
