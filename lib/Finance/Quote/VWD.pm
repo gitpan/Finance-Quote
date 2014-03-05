@@ -41,7 +41,7 @@ use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use HTML::TableExtract;
 
-our $VERSION = '1.26'; # VERSION
+our $VERSION = '1.27'; # VERSION
 
 sub methods { return ( vwd => \&vwd ); }
 

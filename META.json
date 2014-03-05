@@ -58,6 +58,7 @@
             "Mozilla::CA" : "0",
             "POSIX" : "0",
             "Storable" : "0",
+            "Time::Piece" : "0",
             "URI" : "0",
             "URI::Escape" : "0",
             "URI::QueryParam" : "0",
@@ -93,6 +94,6 @@
          "web" : "https://github.com/finance-quote/finance-quote"
       }
    },
-   "version" : "1.26"
+   "version" : "1.27"
 }
 

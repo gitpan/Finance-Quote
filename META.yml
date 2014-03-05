@@ -51,6 +51,7 @@ requires:
   Mozilla::CA: '0'
   POSIX: '0'
   Storable: '0'
+  Time::Piece: '0'
   URI: '0'
   URI::Escape: '0'
   URI::QueryParam: '0'
@@ -65,4 +66,4 @@ resources:
   bugtracker: https://rt.cpan.org/Dist/Display.html?Name=Finance-Quote
   homepage: http://finance-quote.sourceforge.net/
   repository: git://github.com/finance-quote/finance-quote
-version: '1.26'
+version: '1.27'

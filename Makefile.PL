@@ -41,6 +41,7 @@ my %WriteMakefileArgs = (
     "Mozilla::CA" => 0,
     "POSIX" => 0,
     "Storable" => 0,
+    "Time::Piece" => 0,
     "URI" => 0,
     "URI::Escape" => 0,
     "URI::QueryParam" => 0,
@@ -59,7 +60,7 @@ my %WriteMakefileArgs = (
     "Test::More" => 0,
     "Test::Perl::Critic" => 0
   },
-  "VERSION" => "1.26",
+  "VERSION" => "1.27",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -93,6 +94,7 @@ my %FallbackPrereqs = (
   "Test::Kwalitee" => 0,
   "Test::More" => 0,
   "Test::Perl::Critic" => 0,
+  "Time::Piece" => 0,
   "URI" => 0,
   "URI::Escape" => 0,
   "URI::QueryParam" => 0,

@@ -20,7 +20,7 @@ package Finance::Quote::Finanzpartner;
 use strict;
 use HTML::TableExtract;
 
-our $VERSION = '1.26'; # VERSION
+our $VERSION = '1.27'; # VERSION
 
 my $FINANZPARTNER_URL = "http://www.finanzpartner.de/fi/";
 
