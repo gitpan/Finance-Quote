@@ -56,11 +56,9 @@ my %WriteMakefileArgs = (
     "Data::Dumper" => 0,
     "File::Spec" => 0,
     "Test" => 0,
-    "Test::Kwalitee" => 0,
-    "Test::More" => 0,
-    "Test::Perl::Critic" => 0
+    "Test::More" => 0
   },
-  "VERSION" => "1.27",
+  "VERSION" => "1.28",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -91,9 +89,7 @@ my %FallbackPrereqs = (
   "POSIX" => 0,
   "Storable" => 0,
   "Test" => 0,
-  "Test::Kwalitee" => 0,
   "Test::More" => 0,
-  "Test::Perl::Critic" => 0,
   "Time::Piece" => 0,
   "URI" => 0,
   "URI::Escape" => 0,

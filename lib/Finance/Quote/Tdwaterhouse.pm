@@ -33,7 +33,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-our $VERSION = '1.27'; # VERSION
+our $VERSION = '1.28'; # VERSION
 
 # URLs of where to obtain information.
 

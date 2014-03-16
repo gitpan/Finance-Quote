@@ -9,7 +9,7 @@ package Finance::Quote::SIXfunds;
 
 use HTTP::Request::Common;
 
-our $VERSION = '1.27'; # VERSION
+our $VERSION = '1.28'; # VERSION
 
 my $url = 'http://www.six-swiss-exchange.com/funds/security_info_en.html?id=';
 
