@@ -75,7 +75,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder; # Boursorama doesn't put data in table elements anymore but uses <div>
 
-our $VERSION = '1.28'; # VERSION
+our $VERSION = '1.29'; # VERSION
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
 

@@ -44,7 +44,7 @@ use vars qw/ @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-our $VERSION = '1.28'; # VERSION
+our $VERSION = '1.29'; # VERSION
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because

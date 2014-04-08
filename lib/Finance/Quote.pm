@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-our $VERSION = '1.28'; # VERSION
+our $VERSION = '1.29'; # VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -181,7 +181,7 @@ sub new {
             Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
             VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
             Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
-            Yahoo::USA/; }
+            Yahoo::USA za_unittrusts/; }
 
   $this->_load_modules(@modules,@reqmodules);
 

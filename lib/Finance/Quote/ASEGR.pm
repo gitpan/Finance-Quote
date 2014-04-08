@@ -30,7 +30,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-our $VERSION = '1.28'; # VERSION
+our $VERSION = '1.29'; # VERSION
 
 my $ASEGR_URL = 'http://www.ase.gr/content/en/MarketData/Stocks/Prices/Share_SearchResults.asp?';
 

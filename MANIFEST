@@ -93,6 +93,7 @@ lib/Finance/Quote/Yahoo/NZ.pm
 lib/Finance/Quote/Yahoo/USA.pm
 lib/Finance/Quote/YahooJSON.pm
 lib/Finance/Quote/ZA.pm
+lib/Finance/Quote/za_unittrusts.pm
 t/00-use.t
 t/01-pod.t
 t/02-pod-coverage.t
@@ -158,3 +159,4 @@ t/yahoo_europe.t
 t/yahoo_nz.t
 t/yahoojson.t
 t/za.t
+t/za_unittrusts.t
