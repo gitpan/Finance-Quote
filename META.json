@@ -16,7 +16,7 @@
       "Erik Colson <eco@ecocode.net>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.013, CPAN::Meta::Converter version 2.133380",
+   "generated_by" : "Dist::Zilla version 5.015, CPAN::Meta::Converter version 2.141170",
    "license" : [
       "gpl_2"
    ],
@@ -92,6 +92,6 @@
          "web" : "https://github.com/finance-quote/finance-quote"
       }
    },
-   "version" : "1.29"
+   "version" : "1.30"
 }
 

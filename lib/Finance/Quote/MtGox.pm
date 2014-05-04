@@ -25,7 +25,7 @@ use URI::Escape;
 
 require 5.010;
 
-our $VERSION = '1.29'; # VERSION
+our $VERSION = '1.30'; # VERSION
 
 my @markets =
     qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;

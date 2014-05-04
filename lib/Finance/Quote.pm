@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-our $VERSION = '1.29'; # VERSION
+our $VERSION = '1.30'; # VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -174,14 +174,14 @@ sub new {
     shift(@reqmodules) if (@reqmodules);
     # Default modules
     @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso
-            Cdnfundlibrary Citywire Currencies Deka DWS FTPortfolios Fidelity
+            Cdnfundlibrary Citywire CSE Currencies Deka DWS FTPortfolios Fidelity
             FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
             ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
             SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
             Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
             VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
             Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
-            Yahoo::USA za_unittrusts/; }
+            Yahoo::USA ZA_UnitTrusts/; }
 
   $this->_load_modules(@modules,@reqmodules);
 

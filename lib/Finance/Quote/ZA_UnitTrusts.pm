@@ -10,8 +10,10 @@
 # Rolf Endres
 # 2009.10.09
 
-package Finance::Quote::za_unittrusts;
+package Finance::Quote::ZA_UnitTrusts;
 require 5.004;
+
+our $VERSION = '1.30'; # VERSION
 
 use strict;
 
