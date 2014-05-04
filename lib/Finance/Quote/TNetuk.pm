@@ -46,7 +46,7 @@ use HTTP::Cookies;
 use HTML::TokeParser;
 # use Data::Dumper;
 
-our $VERSION = '1.30'; # VERSION
+our $VERSION = '1.31'; # VERSION
 
 $TNETUK_MAIN_URL   =   "http://www.trustnet.com";
 $TNETUK_LOOK_UP    =   "http://www.trustnet.com/Tools/Search.aspx?keyword=";

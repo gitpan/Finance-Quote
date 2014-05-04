@@ -13,7 +13,7 @@
 package Finance::Quote::ZA_UnitTrusts;
 require 5.004;
 
-our $VERSION = '1.30'; # VERSION
+our $VERSION = '1.31'; # VERSION
 
 use strict;
 
@@ -133,7 +133,7 @@ sub za_unittrusts {
 
 =head1 NAME
 
-Finance::Quote::za_unittrusts - Obtain South African unit trust prices from
+Finance::Quote::ZA_UnitTrusts - Obtain South African unit trust prices from
 www.equinox.co.za
 
 =head1 SYNOPSIS
