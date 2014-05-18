@@ -33,7 +33,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 use Time::Piece;
 
-our $VERSION = '1.31'; # VERSION
+our $VERSION = '1.32'; # VERSION
 
 my $YIND_URL_HEAD = 'http://finance.yahoo.com/webservice/v1/symbols/';
 my $YIND_URL_TAIL = '/quote?format=json';
@@ -80,6 +80,8 @@ sub yahoo_json {
         #Response description: 	$desc
         #HTTP Headers:				$headers
         #Response body				$body
+
+        $info{ $stocks, "symbol" } = $stocks;
 
         if ( $code == 200 ) {
 

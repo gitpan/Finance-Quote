@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$PLATINUM_URL /;
 
-our $VERSION = '1.31'; # VERSION
+our $VERSION = '1.32'; # VERSION
 
 $PLATINUM_URL = 'http://www.platinum.com.au/Platinum_Trust_Unit_Prices.htm';
 

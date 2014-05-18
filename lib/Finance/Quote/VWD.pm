@@ -41,7 +41,7 @@ use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use HTML::TableExtract;
 
-our $VERSION = '1.31'; # VERSION
+our $VERSION = '1.32'; # VERSION
 
 sub methods { return ( vwd => \&vwd ); }
 
@@ -101,7 +101,7 @@ sub vwd {
 
         my $request =
               "http://www.finanztreff.de/"
-            . "kurse_einzelkurs_uebersicht.htn?s="
+            . "kurse_einzelkurs_suche.htn?suchbegriff="
             . $fund;
         if ($logging) {
             print LOG "Request='$request'\n";

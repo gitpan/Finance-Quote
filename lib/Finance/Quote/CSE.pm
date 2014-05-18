@@ -34,7 +34,7 @@ use HTTP::Request::Common qw(POST);
 use HTML::TableExtract;
 use CGI;
 
-our $VERSION = '1.31'; # VERSION
+our $VERSION = '1.32'; # VERSION
 
 my $CSE_URL = "http://www.cse.lk/trade_summary_report.do?reportType=CSV";
 
