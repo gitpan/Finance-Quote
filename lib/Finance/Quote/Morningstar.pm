@@ -9,7 +9,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-our $VERSION = '1.32'; # VERSION
+our $VERSION = '1.33'; # VERSION
 $MORNINGSTAR_SE_FUNDS_URL = 'http://morningstar.se/funds/overview.asp?cid=';
 
 sub methods { return (morningstar => \&morningstar); }

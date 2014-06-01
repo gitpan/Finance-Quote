@@ -13,7 +13,7 @@
 package Finance::Quote::ZA_UnitTrusts;
 require 5.004;
 
-our $VERSION = '1.32'; # VERSION
+our $VERSION = '1.33'; # VERSION
 
 use strict;
 
